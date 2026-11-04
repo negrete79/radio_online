@@ -16,6 +16,39 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
 
+<script>
+/* ════════════════════════════════════════════════════════════
+   // CORRIGIDO TV // — DETECÇÃO DE SMART TV + MODO TELA GRANDE
+   ────────────────────────────────────────────────────────────
+   Roda ANTES do CSS para o layout já nascer certo (sem piscar).
+   • html.tv  = é Smart TV (Samsung/Tizen, LG/WebOS, Android TV,
+     Fire TV, TV Bro, Puffin, Chromecast, Roku, Bravia…). Na TV o
+     layout de tela cheia é OBRIGATÓRIO mesmo que o navegador da
+     TV reporte um viewport pequeno — é isso que acabou com a
+     "tirinha fina" no meio da tela.
+   • html.big = telas grandes (notebook, PC, tablet paisagem),
+     ativada pela MESMA media query que está no CSS:
+     (min-width:1024px) OU (min-height:700px e min-width:800px).
+   Guarda também window.__SP_TV para o resto do script.
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  try{
+    var ua = navigator.userAgent || "";
+    var isTV =
+      /Smart[T_\-]?TV|SMART-TV|Tizen|Web0S|WebOS|NetCast|BRAVIA|AFTB|AFTM|AFTS|AFTG|Fire TV|FireTV|CrKey|Android TV|GoogleTV|AppleTV|HbbTV|Viera|Roku|SHIELD|PhilipsTV/i.test(ua) ||
+      (/\bAndroid\b/i.test(ua) && /\bTV\b/i.test(ua)) ||                       /* UA "Linux; Android 9; TV" */
+      (/\bAndroid\b/i.test(ua) && navigator.maxTouchPoints === 0);             /* Android sem toque = TV */
+    var big = window.matchMedia(
+      "(min-width: 1024px), (min-height: 700px) and (min-width: 800px)"
+    ).matches;
+    var root = document.documentElement;
+    if (isTV) root.classList.add("tv");
+    if (isTV || big) root.classList.add("big");
+    window.__SP_TV = isTV;
+  }catch(e){ /* navegador muito antigo: fica no layout mobile */ }
+})();
+</script>
+
 <style>
 /* ════════════════════════════════════════════════════════════
    SERTANEJA POP — estilo neon (rosa #ff2d55 / roxo #7a00ff /
@@ -128,6 +161,7 @@ h1{
 }
 .song-artist{margin-top:5px;font-size:15px;font-weight:600;color:var(--txt-dim);letter-spacing:.3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-label{display:none}  /* "Now Playing" só aparece no layout grande (TV/PC) */
 .live-chip{
   margin-top:10px;display:inline-flex;gap:7px;align-items:center;
   font-size:11px;font-weight:800;letter-spacing:2.4px;color:#ff5f7a;
@@ -275,20 +309,69 @@ section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,
 }
 
 /* ════════════════════════════════════════════════════════════
-   RESPONSIVO — smartphone, tablet, notebook, PC e TV Android
+   RESPONSIVO — smartphone, tablet, notebook, PC e TV
    ────────────────────────────────────────────────────────────
-   No celular as colunas são "invisíveis" (display:contents) e
-   NADA muda. A partir de 960px vira 2 colunas (player à
-   esquerda, histórico/busca à direita). Na TV tudo cresce e
-   ganha margem de segurança para o overscan da tela.
+   • Celular (até 599px): EXATAMENTE como sempre foi — card de
+     400px, vertical, não mexemos em nada.
+   • Tablet (600–1023px): mesmo layout vertical, só maiores.
+   • Grande (≥1024px OU ≥800px com altura ≥700px — html.big):
+     layout horizontal que PREENCHE a tela inteira.
+   • Smart TV (html.tv): SEMPRE entra no layout grande, mesmo
+     com viewport pequeno — acabou a "tirinha fina".
    ════════════════════════════════════════════════════════════ */
-.player-col,.side-col{display:contents}
+/* ══════════ // CORRIGIDO TV // — ESTRUTURA DAS COLUNAS ══════════
+   No celular as 4 divisórias são "invisíveis" (display:contents) e
+   o fluxo é EXATAMENTE o mesmo de antes: topo, vinil, música,
+   equalizador, play, volume, instalar, histórico, busca, debug.
+   Em telas grandes (html.big) elas viram colunas de verdade. */
+.col-left,.col-right,.side-col,.play-eq-row{display:contents}
 .side-col{min-width:0}
 
-/* Foco visível para navegar com o CONTROLE REMOTO da TV (D-pad) */
+/* ── Foco visível para navegar com o CONTROLE REMOTO da TV (D-pad) ── */
 button:focus-visible,input:focus-visible{
   outline:3px solid var(--green);outline-offset:3px;border-radius:18px
 }
+/* Na TV o :focus-visible nem sempre existe — usamos :focus direto */
+html.tv button:focus,html.tv input:focus,html.tv a:focus{
+  outline:4px solid var(--green);outline-offset:3px;border-radius:18px
+}
+
+/* ── Aviso da TV (aparece se abrir dentro de WebView tipo Downloader) ── */
+.tv-warn{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:60;
+  background:rgba(255,149,0,.16);border-bottom:1px solid rgba(255,149,0,.5);
+  color:#ffe3c2;font-size:13.5px;line-height:1.55;padding:12px 16px;text-align:center;
+}
+.tv-warn.show{display:block}
+.tv-warn b{color:#fff}
+.tv-warn button{
+  margin-left:10px;padding:5px 16px;border-radius:999px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.45);
+  color:#fff;font-weight:800;font-family:inherit;
+}
+
+/* ── Toast de volume (feedback das setas ↑/↓ no controle da TV) ── */
+#volToast{
+  position:fixed;left:50%;bottom:7vh;transform:translateX(-50%) scale(.9);
+  opacity:0;transition:opacity .18s,transform .18s;z-index:50;pointer-events:none;
+  background:rgba(10,2,10,.92);border:1px solid rgba(0,255,157,.55);color:#fff;
+  font-weight:800;letter-spacing:1.5px;padding:12px 28px;border-radius:999px;
+  font-size:16px;box-shadow:0 0 30px rgba(0,255,157,.28);
+}
+#volToast.show{opacity:1;transform:translateX(-50%) scale(1)}
+
+/* ── TV: navegador de TV é fraco — tiramos os efeitos pesados ──
+   (backdrop-filter e blur derrubam WebViews antigas, travam a página) */
+html.tv .card{
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:rgba(26,10,24,.80);
+}
+html.tv .aura{filter:none;opacity:.20;animation-duration:14s}
+/* // CORRIGIDO INSTALAR //: na TV o botão INSTALAR TAMBÉM APARECE
+   (antes a TV escondia o botão — era isso que faltava). Se o
+   navegador da TV não souber instalar, a dica de 6s explica o
+   caminho certo (navegador da TV, nunca o Downloader). */
+html.tv #audio{position:absolute;left:0;top:0}  /* alguns WebViews pausam áudio offscreen */
 
 /* ── Tablet (≥600px) ── */
 @media (min-width:600px){
@@ -316,107 +399,151 @@ button:focus-visible,input:focus-visible{
   .hist-txt .a{font-size:13px}
 }
 
-/* ── Notebook / PC (≥960px) — e Android TV com 960px lógicos ── */
-@media (min-width:960px){
-  .app{max-width:1200px;padding:32px 34px 42px}
-  .card{
-    display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
-    column-gap:64px;align-items:start;
-    padding:40px 48px 30px;border-radius:44px;
-  }
-  .top{grid-column:1/-1}
-  .player-col,.side-col{display:block}
-  h1{font-size:clamp(50px,4.8vw,72px)}
-  .vinyl-zone{height:calc(min(430px,40vw) + 36px);margin:28px 0 4px}
-  .aura,.vinyl{width:min(430px,40vw);height:min(430px,40vw)}
-  .cover{width:min(310px,29vw);height:min(310px,29vw)}
-  .pop-btn{width:88px;height:88px;font-size:17px}
-  .song-title{font-size:clamp(28px,2.9vw,42px);-webkit-line-clamp:3}
-  .song-artist{font-size:clamp(17px,1.6vw,23px)}
-  .live-chip{font-size:13px}
-  .eq{height:62px;gap:4px;margin-top:22px}
-  .eq i{width:8px}
-  .play-btn{width:126px;height:126px}
-  .play-btn svg{width:52px;height:52px}
-  .vol{margin:20px auto 0;max-width:430px}
-  section h2{font-size:13px;letter-spacing:3px}
-  .hist-item{padding:10px 12px}
-  .hist-item img{width:56px;height:56px}
-  .hist-txt .t{font-size:15px}
-  .search-row input{padding:14px 16px;font-size:15px}
-  .search-row button{padding:14px 18px;font-size:14px}
-  .q-results{grid-template-columns:1fr 1fr 1fr}
-  .debug{margin-top:22px}
+/* ════════════════════════════════════════════════════════════
+   // CORRIGIDO TV // — TELA GRANDE / SMART TV (html.big)
+   ────────────────────────────────────────────────────────────
+   Ativado pela media query pedida — (min-width:1024px) OU
+   (min-height:700px) e (min-width:800px) — sincronizada com o
+   JS do <head>, e SEMPRE na Smart TV (html.tv), em qualquer
+   viewport. O card sai dos 400px e passa a ocupar 96% da
+   largura e 92% da altura da tela, em DUAS colunas:
+     ESQUERDA: título + vinil gigante 380x380 + música + artista
+     DIREITA : equalizador 80px + play 130px + volume + instalar
+   Em PC/notebook alto (≥1200px e ≥760px de altura) o histórico
+   e a busca viram uma 3ª coluna; em TV baixa (720p/540p) ela se
+   esconde para nada estourar a tela.
+   Os tamanhos usam clamp()+vmin: numa TV 1080p chegam nos
+   valores exatos (h1 64px, música 42px, artista 22px, vinil
+   380px, play 130px, equalizador 80px) e escalam sozinhos em
+   telas menores — nada estoura, nada fica fora da tela.
+   ════════════════════════════════════════════════════════════ */
+html.big .app{
+  max-width:none;width:100%;padding:0;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
 }
-
-/* TV de resolução lógica baixa (ex.: 960×540): compacta a altura
-   para o play ficar visível sem rolar com o controle remoto */
-@media (min-width:960px) and (max-height:760px){
-  .app{padding:12px 24px 18px}
-  .card{padding:20px 36px 16px;column-gap:44px}
-  .top-badge{font-size:11px;padding:6px 14px;letter-spacing:2.4px}
-  h1{font-size:clamp(30px,6.8vh,48px);margin:8px 0 2px}
-  .vinyl-zone{height:calc(min(250px,42vh) + 22px);margin:8px 0 2px}
-  .aura,.vinyl{width:min(250px,42vh);height:min(250px,42vh)}
-  .cover{width:min(180px,30vh);height:min(180px,30vh)}
-  .pop-btn{width:62px;height:62px;font-size:13px}
-  .song{margin-top:6px}
-  .song-title{font-size:clamp(22px,5vh,32px)}
-  .song-artist{font-size:clamp(13px,2.5vh,18px)}
-  .live-chip{font-size:11px;margin-top:6px}
-  .eq{height:40px;margin-top:8px;gap:3px}
-  .eq i{width:6px}
-  .play-row{margin:8px 0 0}
-  .play-btn{width:84px;height:84px}
-  .play-btn svg{width:36px;height:36px}
-  .vol{margin:10px auto 0;max-width:360px}
-  section{margin-top:12px}
+html.big .card{
+  max-width:96vw;width:96vw;min-height:92vh;margin:0;
+  display:flex;flex-direction:row;align-items:center;gap:40px;
+  text-align:left;padding:30px 40px;border-radius:44px;
 }
+/* ── ESQUERDA: título + vinil + música/artista ── */
+html.big .col-left{
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  flex:1 1 0;min-width:0;
+}
+html.big .top{display:flex;flex-direction:column;align-items:center;text-align:center;margin:0}
+/* // CORRIGIDO TV // letreiro neon IGUAL À IMAGEM: SERTANEJA laranja
+   em cima, POP rosa embaixo, com brilho de neon. No celular continua
+   o gradiente de sempre — nada muda lá. */
+html.big .top-badge{display:none}
+html.big h1{
+  font-size:clamp(36px,6vmin,64px);margin:12px 0 0;           /* h1 64px na TV 1080p */
+  background:none;-webkit-background-clip:border-box;background-clip:border-box;
+  color:#ffb43d;letter-spacing:5px;filter:none;
+  text-shadow:0 0 16px rgba(255,149,0,.62),0 0 54px rgba(255,149,0,.30);
+}
+html.big h1 .h1-pop{
+  display:block;color:#ff2d55;
+  text-shadow:0 0 16px rgba(255,45,85,.66),0 0 54px rgba(255,45,85,.30);
+}
+html.big .vinyl-zone{height:calc(min(380px,42vmin) + 36px);margin:20px 0 0}
+html.big .aura,html.big .vinyl{width:min(380px,42vmin);height:min(380px,42vmin)}  /* vinil 380px na TV */
+html.big .cover{width:min(275px,30vmin);height:min(275px,30vmin)}
+html.big .pop-btn{width:88px;height:88px;font-size:17px}
 
-/* ── TV grande / PC em tela cheia (1600px+) ──
-   Layout horizontal: vinil à esquerda, título/equalizador/play
-   à direita dele — TUDO cabe numa tela só, sem rolar. */
-@media (min-width:1600px), (min-width:1280px) and (min-height:960px){
-  .app{max-width:1560px;padding:4vmin} /* margem de segurança do overscan da TV */
-  .card{padding:44px 60px 36px;border-radius:52px;column-gap:80px;
-        grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr);align-items:center}
-  .player-col{
-    display:grid;
-    grid-template-columns:minmax(0,auto) minmax(0,1fr);
-    grid-template-areas:"vinyl song" "vinyl eq" "vinyl play" "vinyl vol";
-    column-gap:56px;row-gap:22px;align-content:center;
+/* ── DIREITA: play GIGANTE + equalizador + Now Playing + volume ──
+   // CORRIGIDO TV // painel de vidro IGUAL À IMAGEM de referência:
+   em cima o PLAY verde neon gigante com o equalizador colorido ao
+   lado; no meio "Now Playing" + música + artista + selo AO VIVO;
+   embaixo o volume e o botão instalar. A ORDEM visual usa "order"
+   porque no DOM a ordem segue o celular (para não mexer no mobile). */
+html.big .col-right{
+  display:flex;flex-direction:column;justify-content:center;
+  flex:0 0 clamp(300px,32vw,480px);min-width:0;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);border-radius:32px;
+  padding:clamp(20px,3.4vmin,34px);
+}
+html.big .play-eq-row{order:1}
+html.big .song{order:2}
+html.big .vol{order:3}
+html.big .install-row{order:4}
+/* PLAY + EQUALIZADOR lado a lado, como na imagem */
+html.big .play-eq-row{
+  display:flex;flex-direction:row-reverse;align-items:center;
+  gap:clamp(18px,2.6vmin,30px);
+}
+html.big .play-row{margin:0;flex:none}
+/* Botão play GIGANTE com anel verde neon (igual à imagem) */
+html.big .play-btn{
+  width:clamp(110px,17vmin,180px);height:clamp(110px,17vmin,180px);
+  background:radial-gradient(circle at 50% 40%, rgba(0,255,157,.25), rgba(0,255,157,.05) 72%);
+  border:5px solid var(--green);
+  box-shadow:0 0 36px rgba(0,255,157,.55), inset 0 0 26px rgba(0,255,157,.25);
+}
+html.big .play-btn svg{width:clamp(44px,6.6vmin,70px);height:clamp(44px,6.6vmin,70px);fill:#f2fff9;margin-left:4px}
+html.big .eq{
+  flex:1 1 0;height:clamp(48px,7.5vmin,80px);gap:4px;margin:0;   /* eq 80px na TV */
+  justify-content:space-between;padding:0 2px;
+}
+html.big .eq i{width:clamp(7px,.8vmin,10px)}
+/* "Now Playing" + música + artista + selo AO VIVO */
+html.big .song{
+  margin:clamp(16px,2.6vmin,26px) 0 0;
+  display:flex;flex-direction:column;align-items:flex-start;
+  text-align:left;                          /* igual à imagem: alinhado à esquerda */
+}
+html.big .np-label{
+  display:block;                            /* // CORRIGIDO TV // rótulo aparece na TV/PC */
+  font-size:clamp(13px,1.7vmin,18px);font-weight:700;letter-spacing:1.2px;
+  color:rgba(255,255,255,.88);margin-bottom:4px;
+}
+html.big .song-title{font-size:clamp(26px,4vmin,42px);-webkit-line-clamp:3}        /* música 42px na TV */
+html.big .song-artist{font-size:clamp(15px,2.1vmin,22px);margin-top:8px}           /* artista 22px na TV */
+html.big .live-chip{
+  margin-top:14px;padding:7px 16px;border-radius:999px;
+  background:rgba(255,45,85,.14);border:1px solid rgba(255,45,85,.45);
+  font-size:clamp(11px,1.4vmin,14px);
+}
+/* Volume + instalar */
+html.big .vol{margin:clamp(16px,2.6vmin,24px) 0 0;max-width:none}
+html.big .vol input{height:9px;border-radius:5px}
+html.big .vol input::-webkit-slider-thumb{width:30px;height:30px}
+html.big .vol input::-moz-range-thumb{width:26px;height:26px}
+html.big .install-row{margin-top:clamp(18px,2.6vmin,26px)}
+html.big #installBtn{font-size:clamp(14px,1.8vmin,19px);padding:18px;border-radius:22px}
+html.big .diag-warn,html.big .ios-hint{font-size:clamp(12px,1.5vmin,16px)}
+
+/* ── 3ª COLUNA (PC/notebook/TV com tela alta): histórico + busca ── */
+html.big .side-col{display:none}   /* TV baixa (720p/540p): fica de fora, tela limpa */
+@media (min-width:1200px) and (min-height:760px){
+  html.big .side-col{
+    display:flex;flex-direction:column;justify-content:center;gap:20px;
+    flex:0 1 clamp(300px,26vw,460px);min-width:0;
   }
-  .vinyl-zone{grid-area:vinyl;height:calc(min(540px,44vmin) + 44px);margin:0}
-  .aura,.vinyl{width:min(540px,44vmin);height:min(540px,44vmin)}
-  .cover{width:min(390px,32vmin);height:min(390px,32vmin)}
-  .pop-btn{width:98px;height:98px;font-size:19px;letter-spacing:2px}
-  .song{grid-area:song;text-align:left;margin:0}
-  .song-title{text-align:left;font-size:clamp(36px,4.4vmin,62px)}
-  .song-artist{text-align:left;font-size:clamp(19px,2.3vmin,30px)}
-  .live-chip{margin-top:12px}
-  .eq{grid-area:eq;justify-content:flex-start;margin:0;height:74px}
-  .play-row{grid-area:play;justify-content:flex-start;margin:0}
-  .play-btn{width:clamp(112px,12.5vmin,152px);height:clamp(112px,12.5vmin,152px)}
-  .play-btn svg{width:clamp(46px,5.4vmin,64px);height:clamp(46px,5.4vmin,64px)}
-  .vol{grid-area:vol;margin:0;max-width:480px}
-  .top-badge{font-size:15px;letter-spacing:4px;padding:11px 24px}
-  h1{font-size:clamp(60px,6.4vmin,100px)}
-  .vol input{height:9px;border-radius:5px}
-  .vol input::-webkit-slider-thumb{width:30px;height:30px}
-  section h2{font-size:clamp(13px,1.6vmin,19px);letter-spacing:3.4px}
-  .hist-item{padding:14px 16px;border-radius:20px}
-  .hist-item img{width:74px;height:74px;border-radius:14px}
-  .hist-txt .t{font-size:clamp(15px,1.8vmin,22px)}
-  .hist-txt .a{font-size:clamp(13px,1.5vmin,18px)}
-  .search-row input{padding:18px 20px;font-size:clamp(15px,1.8vmin,20px);border-radius:20px}
-  .search-row button{padding:18px 24px;font-size:clamp(14px,1.7vmin,19px);border-radius:20px}
-  .q-results{grid-template-columns:1fr 1fr 1fr;gap:14px}
-  .q-item{border-radius:22px}
-  .q-item .t{font-size:clamp(13px,1.6vmin,18px)}
-  .q-item .a{font-size:clamp(12px,1.4vmin,16px)}
-  #installBtn{font-size:clamp(15px,1.8vmin,20px);padding:18px}
-  .debug{font-size:clamp(11px,1.3vmin,15px)}
-  .footer{font-size:clamp(11px,1.3vmin,15px)}
+  html.big section{margin-top:0}
+  html.big section h2{font-size:clamp(12px,1.5vmin,16px)}
+  html.big .hist-item{padding:12px 14px;border-radius:20px}
+  html.big .hist-item img{width:62px;height:62px;border-radius:14px}
+  html.big .hist-txt .t{font-size:clamp(14px,1.7vmin,20px)}
+  html.big .hist-txt .a{font-size:clamp(12px,1.4vmin,16px)}
+  html.big .search-row input{padding:16px 18px;font-size:clamp(14px,1.7vmin,18px);border-radius:20px}
+  html.big .search-row button{padding:16px 22px;font-size:clamp(13px,1.6vmin,17px);border-radius:20px}
+  html.big .q-results{grid-template-columns:1fr 1fr;gap:12px}
+  html.big .q-item{border-radius:22px}
+  html.big .q-item .t{font-size:clamp(13px,1.6vmin,18px)}
+  html.big .q-item .a{font-size:clamp(12px,1.4vmin,16px)}
+  html.big .debug{font-size:clamp(11px,1.3vmin,14px);margin-top:2px}
+}
+html.big .footer{font-size:clamp(10px,1.2vmin,13px);margin-top:12px}
+/* // CORRIGIDO TV // na Smart TV a tela fica SÓ com o player em 2
+   colunas, IGUAL À IMAGEM: sem histórico, sem busca, sem debug e sem
+   rodapé — nada de informação sobrando na TV. */
+html.tv .side-col,html.tv .footer{display:none!important}
+/* TV baixa (720p/540p): sem o rodapé nada passa dos 100vh — zero rolagem */
+@media (min-width:800px) and (max-height:660px){
+  html.big .footer{display:none}
 }
 </style>
 </head>
@@ -424,49 +551,81 @@ button:focus-visible,input:focus-visible{
 <div class="app">
   <div class="card">
 
+    <!-- ══ // CORRIGIDO TV // COLUNA ESQUERDA (topo + vinil + música) ══
+         No celular .col-left/.col-right/.side-col são display:contents
+         (invisíveis): o layout mobile continua EXATAMENTE o mesmo.
+         Na TV / telas grandes elas viram as colunas do card grande. -->
+    <div class="col-left">
+
     <!-- ── Topo ── -->
     <header class="top">
       <span class="top-badge">★ RÁDIO AO VIVO • 24H ★</span>
-      <h1>SERTANEJA POP</h1>
+      <h1>SERTANEJA <span class="h1-pop">POP</span></h1>
     </header>
 
-    <!-- ── Vinil + capa + botão POP + player ──
-         No PC/TV este bloco vira a COLUNA ESQUERDA;
-         no celular ele é invisível (display:contents) e nada muda. -->
-    <div class="player-col">
+    <!-- ── Vinil + capa + botão POP ── -->
       <div class="vinyl-zone">
         <div class="aura"></div>
         <div class="vinyl">
           <img id="cover" class="cover" src="icons/icon-512.png" alt="Capa da música"/>
         </div>
-        <button class="pop-btn" id="popBtn" aria-label="Tocar ou pausar">POP</button>
+        <!-- CORRIGIDO TV: tabindex=0 para o controle remoto focar o botão -->
+        <button class="pop-btn" id="popBtn" aria-label="Tocar ou pausar" tabindex="0">POP</button>
       </div>
+    </div><!-- /.col-left -->
 
-      <!-- ── Música atual ── -->
+    <!-- ══ // CORRIGIDO TV // COLUNA DIREITA (música + play GIGANTE +
+         equalizador + volume + instalar — na ORDEM da imagem) ══ -->
+    <div class="col-right">
+
+      <!-- ── Música atual, com "Now Playing" igual à imagem ──
+           // CORRIGIDO TV // no celular continua igual (o .np-label é
+           escondido); na TV aparece o rótulo Now Playing em cima. -->
       <div class="song">
+        <div class="np-label">Now Playing</div>
         <div class="song-title" id="songTitle">Toque no PLAY para ouvir</div>
         <div class="song-artist" id="songArtist">Rádio Sertaneja Pop • 24h ao vivo</div>
         <div class="live-chip"><span class="dot"></span> AO VIVO</div>
       </div>
 
-      <!-- ── Equalizador (20 barras geradas via JS) ── -->
-      <div class="eq" id="eq" aria-hidden="true"></div>
-
-      <!-- ── Play + Volume ── -->
-      <div class="play-row">
-        <button class="play-btn" id="playBtn" aria-label="Tocar">
-          <svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5.3v13.4L19 12z"/></svg>
-          <svg id="icPause" viewBox="0 0 24 24" style="display:none;margin-left:0"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>
-        </button>
+      <!-- ── Play GIGANTE + Equalizador lado a lado (igual à imagem) ── -->
+      <div class="play-eq-row">
+        <!-- ── Equalizador (20 barras geradas via JS) ── -->
+        <div class="eq" id="eq" aria-hidden="true"></div>
+        <div class="play-row">
+          <!-- CORRIGIDO TV: tabindex=0 + foco automático na TV (o controle
+               remoto começa APONTANDO para o play, com contorno verde) -->
+          <button class="play-btn" id="playBtn" aria-label="Tocar" tabindex="0">
+            <svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5.3v13.4L19 12z"/></svg>
+            <svg id="icPause" viewBox="0 0 24 24" style="display:none;margin-left:0"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>
+          </button>
+        </div>
       </div>
       <div class="vol">
         <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/></svg>
         <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume"/>
         <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.6a5 5 0 010 6.8M18.8 6.2a8.2 8.2 0 010 11.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </div>
-    </div>
 
-    <!-- ── Coluna lateral (histórico / busca / instalar) ── -->
+      <!-- ══ // CORRIGIDO INSTALAR // botão de instalação ══
+           Fica logo abaixo do volume (bem visível ao abrir).
+           Aparece SÓ quando o navegador avisa que dá para instalar
+           (evento beforeinstallprompt) e SOME sozinho após instalar
+           (appinstalled / modo standalone / iOS / já instalou antes).
+           No iPhone mostra a dica “Adicionar à Tela de Início”;
+           na Smart TV TAMBÉM aparece quando o navegador da TV
+           permite instalar (// CORRIGIDO INSTALAR //). -->
+      <div class="install-row">
+        <button id="installBtn" hidden>⬇ INSTALAR APP NA TELA INICIAL</button>
+        <div class="ios-hint" id="iosHint">
+          <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
+          <b>“Adicionar à Tela de Início”</b> para instalar o app.
+        </div>
+        <div class="diag-warn" id="diag"></div>
+      </div>
+    </div><!-- /.col-right -->
+
+    <!-- ── Coluna lateral (histórico / busca / debug) ── -->
     <div class="side-col">
       <!-- ── Histórico ── -->
       <section>
@@ -484,22 +643,23 @@ button:focus-visible,input:focus-visible{
         <div class="q-results" id="qResults"></div>
       </section>
 
-      <!-- ── Instalação ── -->
-      <div class="install-row">
-        <button id="installBtn" hidden>INSTALAR APP</button>
-        <div class="ios-hint" id="iosHint">
-          <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
-          <b>“Adicionar à Tela de Início”</b> para instalar o app.
-        </div>
-        <div class="diag-warn" id="diag"></div>
-      </div>
-
       <!-- ── Debug ── -->
       <div class="debug" id="debug">—</div>
     </div>
   </div>
   <div class="footer">SERTANEJA POP • 24H AO VIVO • FEITO PARA INSTALAR</div>
 </div>
+
+<!-- ══ // CORRIGIDO TV // aviso para quem abriu pelo Downloader (WebView) ══ -->
+<div class="tv-warn" id="tvWarn" role="alert">
+  <b>📺 Smart TV detectada.</b> Se a página travar ou não abrir, NÃO use o app
+  <b>Downloader</b> — abra pelo <b>navegador da TV</b>
+  (TV Bro, Samsung Internet, Silk Browser ou Puffin TV).
+  <button id="tvWarnClose" type="button">OK</button>
+</div>
+
+<!-- ══ // CORRIGIDO TV // feedback de volume (setas ↑/↓ do controle) ══ -->
+<div id="volToast" aria-hidden="true">VOL 80%</div>
 
 <!-- ════════════════════════════════════════════════════════════
      ÁUDIO NATIVO — NÃO trocar por AudioContext/Web Audio API!
@@ -542,7 +702,35 @@ var audio=$("audio"), playBtn=$("playBtn"), popBtn=$("popBtn"),
     songTitle=$("songTitle"), songArtist=$("songArtist"),
     histList=$("histList"), qInput=$("q"), qBtn=$("qBtn"), qResults=$("qResults"),
     debugEl=$("debug"), volInput=$("vol"),
-    installBtn=$("installBtn"), iosHint=$("iosHint");
+    installBtn=$("installBtn"), iosHint=$("iosHint"),
+    volToast=$("volToast"), tvWarn=$("tvWarn");
+
+/* ══════════════ // CORRIGIDO TV // DETECÇÃO + CONTROLE REMOTO ══════════════
+   IS_TV vem do script do <head> (mesma detecção: Tizen, WebOS,
+   Android TV, Fire TV, TV Bro, Puffin…). Na TV: o foco começa no
+   PLAY, o teclado/controle controla tudo e o aviso do Downloader
+   aparece quando a página abre dentro de WebView. */
+var IS_TV  = window.__SP_TV === true;
+var IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+             (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
+/* // CORRIGIDO TV // mantém o modo TELA GRANDE em sincronia com a
+   media query (min-width:1024px) OU (min-height:700px e min-width:800px).
+   A TV não participa: pra ela a classe html.big já é FIXA. */
+var MQ_BIG = "(min-width: 1024px), (min-height: 700px) and (min-width: 800px)";
+function layoutSync(){
+  if (IS_TV) return;
+  document.documentElement.classList.toggle("big", window.matchMedia(MQ_BIG).matches);
+}
+window.addEventListener("resize", layoutSync);
+window.addEventListener("orientationchange", layoutSync);
+
+/* // CORRIGIDO TV // na TV o foco já começa no botão PLAY:
+   o controle remoto liga a rádio apertando OK logo de cara,
+   com o contorno verde mostrando onde está o foco. */
+if (IS_TV){
+  setTimeout(function(){ try{ playBtn.focus(); }catch(e){} }, 600);
+}
 
 /* ── Estado ── */
 var state = { playing:false, raw:"", song:null, history:[] };
@@ -996,6 +1184,39 @@ volInput.addEventListener("input", function(){
   try{ audio.volume = volInput.value / 100; }catch(e){}
 });
 
+/* ══════════════ // CORRIGIDO TV // TECLADO / CONTROLE REMOTO ══════════════
+   ENTER ou ESPAÇO  = toca / pausa
+   SETA PARA CIMA   = aumenta o volume (+5%)
+   SETA PARA BAIXO  = diminui o volume (−5%)
+   O D-pad do controle da TV manda Enter e setas — funciona igual
+   no teclado do PC. Cada ajuste mostra o toast "VOL xx%". */
+function flashVol(){
+  volToast.textContent = "VOL " + Math.round(audio.volume * 100) + "%";
+  volToast.classList.add("show");
+  clearTimeout(flashVol._t);
+  flashVol._t = setTimeout(function(){ volToast.classList.remove("show"); }, 1400);
+}
+function setVolume(v){
+  v = Math.max(0, Math.min(1, v));
+  try{ audio.volume = v; }catch(e){}        /* iOS ignora volume do elemento */
+  volInput.value = Math.round(audio.volume * 100);
+  flashVol();
+}
+window.addEventListener("keydown", function(e){
+  var t = e.target, tag = (t && t.tagName) ? t.tagName.toLowerCase() : "";
+  var typing = (tag === "input" && t.type !== "range") || tag === "textarea" || tag === "select";
+  if (typing) return;                       /* digitando na busca: não rouba teclas */
+  if (e.key === "ArrowUp" || e.key === "ArrowDown"){
+    if (tag === "input") return;            /* slider em foco: ajuste nativo fino */
+    e.preventDefault();
+    setVolume(audio.volume + (e.key === "ArrowUp" ? 0.05 : -0.05));
+  } else if (e.key === "Enter" || e.key === " " || e.key === "Spacebar"){
+    if (tag === "button" || tag === "input" || tag === "a") return; /* foco em outro controle: clique nativo */
+    e.preventDefault();
+    togglePlay();
+  }
+});
+
 /* Trocar de aba / apagar a tela: NÃO pausamos nada de propósito.
    O <audio> nativo + MediaSession mantêm a música no segundo plano. */
 document.addEventListener("visibilitychange", function(){ /* intencional */ });
@@ -1077,10 +1298,53 @@ function showDiag(html){
 }
 function hideDiag(){ if (diagEl) diagEl.classList.remove("show"); }
 
+/* ══════════════ // CORRIGIDO INSTALAR // BOTÃO QUE APARECE E SOME ══════════════
+   Regras:
+   • Aparece SÓ se: app NÃO instalado + beforeinstallprompt disparou.
+   • SOME para sempre quando: appinstalled, ou rodando em modo
+     standalone (aberto pela ícone), ou iOS com navigator.standalone,
+     ou se o usuário já instalou antes (marcado no localStorage).
+   • iPhone (não tem beforeinstallprompt): mostra a dica
+     “Compartilhar > Adicionar à Tela de Início” no lugar do botão.
+   • Smart TV: TAMBÉM aparece — se o navegador da TV permitir
+     instalar (// CORRIGIDO INSTALAR //); se não permitir, a dica
+     de 6s ensina a abrir pelo navegador certo da TV. */
+function isStandalone(){
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.matchMedia("(display-mode: fullscreen)").matches ||
+         window.matchMedia("(display-mode: minimal-ui)").matches ||
+         window.navigator.standalone === true;   /* iOS antigo */
+}
+var store = null;
+try{ store = window.localStorage; store.getItem("sp_installed"); }catch(e){ store = null; } /* WebView privado bloqueia */
+
+function hideInstallUI(){
+  installBtn.hidden = true;
+  iosHint.classList.remove("show");
+}
+function markInstalled(why){
+  state.installed = true;
+  try{ if (store) store.setItem("sp_installed", "1"); }catch(e){}
+  hideInstallUI();
+  dbg("App instalado ✓ " + (why || ""));
+}
+
+state.installed = (store && store.getItem("sp_installed") === "1") || isStandalone();
+if (state.installed){
+  hideInstallUI();
+  dbg("Rodando como app instalado ✓");
+} else if (IS_IOS){
+  iosHint.classList.add("show");   /* iPhone: dica no lugar do botão */
+}
+/* // CORRIGIDO INSTALAR // a TV NÃO esconde mais o botão: se o
+   navegador da TV souber instalar (beforeinstallprompt), o botão
+   INSTALAR aparece igual no celular e some depois de instalar. */
+
+/* O navegador avisou que DÁ para instalar? AGORA o botão aparece */
 window.addEventListener("beforeinstallprompt", function(e){
   e.preventDefault();
   deferredPrompt = e;
-  installBtn.hidden = false;
+  if (!state.installed) installBtn.hidden = false;  /* // CORRIGIDO INSTALAR // vale pra TV também */
   hideDiag(); /* instalável de verdade — some com avisos */
   dbg("App pronto para instalar ✓");
 });
@@ -1089,22 +1353,27 @@ installBtn.addEventListener("click", function(){
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(function(choice){
     dbg("Instalação: " + choice.outcome);
-    if (choice.outcome === "accepted") installBtn.hidden = true;
+    if (choice.outcome === "accepted") markInstalled("pelo botão");
+    else hideInstallUI();  /* dispensou: some (o Chrome não pergunta de novo na sessão) */
     deferredPrompt = null;
   });
 });
-window.addEventListener("appinstalled", function(){
-  installBtn.hidden = true;
-  dbg("App instalado com sucesso! ✓");
-});
+/* Instalou AGORA (com o app aberto): some na hora */
+window.addEventListener("appinstalled", function(){ markInstalled("evento appinstalled"); });
 
-/* Médico de instalação — roda 1x ao abrir o app */
+/* O display-mode virou standalone (instalou e reabriu pela ícone)? some também */
+var mqStandalone = window.matchMedia("(display-mode: standalone)");
+function onStandaloneChange(m){ if (m.matches) markInstalled("modo standalone"); }
+if (mqStandalone.addEventListener) mqStandalone.addEventListener("change", onStandaloneChange);
+else if (mqStandalone.addListener) mqStandalone.addListener(onStandaloneChange);
+
+/* Médico de instalação — roda 1x ao abrir o app.
+   // CORRIGIDO INSTALAR //: pula o iPhone (a dica já foi mostrada) e
+   quando o app já está instalado. // CORRIGIDO TV // na TV ele roda
+   sim — se o navegador da TV não deixar instalar, a dica de 6s
+   explica o caminho certo (navegador da TV, não o Downloader). */
 (function(){
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  var standalone = window.matchMedia("(display-mode: standalone)").matches ||
-                   window.navigator.standalone === true;
-  if (isIOS && !standalone) iosHint.classList.add("show");
-  if (standalone){ dbg("Rodando como app instalado ✓"); return; }
+  if (IS_IOS || state.installed) return;
 
   /* 1) Abriu o arquivo direto do aparelho/PC (sem servidor) */
   if (location.protocol === "file:"){
@@ -1128,8 +1397,9 @@ window.addEventListener("appinstalled", function(){
     return;
   }
 
-  /* 4) Confere se o manifest.json subiu junto no servidor */
-  fetch("manifest.json", { cache: "no-store" }).then(function(r){
+  /* 4) Confere se o manifest.json subiu junto no servidor
+     // CORRIGIDO TV // essa checagem não roda na TV */
+  if (!IS_TV) fetch("manifest.json", { cache: "no-store" }).then(function(r){
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
   }).then(function(m){
@@ -1151,17 +1421,40 @@ window.addEventListener("appinstalled", function(){
       "Sem ele o app não instala.");
   });
 
-  /* 5) Chrome: se em 6s o botão não apareceu e não há aviso grave,
-     ensina o caminho manual do menu (sempre funciona) */
-  if (!isIOS){
+  /* 5) Se em 6s o botão não apareceu e não há aviso grave, ensina o
+     caminho manual // CORRIGIDO INSTALAR // com texto certo pra TV */
+  if (!IS_IOS){
     setTimeout(function(){
       if (deferredPrompt || !installBtn.hidden) return;
       if (diagEl && diagEl.classList.contains("show")) return;
-      showDiag("💡 <b>Para instalar:</b> menu <b>⋮</b> do navegador → " +
-        "<b>“Instalar aplicativo”</b> (ou <b>“Adicionar à tela inicial”</b>).");
+      if (IS_TV){
+        showDiag("💡 <b>Para instalar na TV:</b> abra pelo <b>navegador da TV</b> " +
+          "(TV Bro, Puffin TV, Samsung Internet…) — não pelo Downloader — e use o " +
+          "menu do navegador → <b>“Instalar aplicativo”</b>.");
+      } else {
+        showDiag("💡 <b>Para instalar:</b> menu <b>⋮</b> do navegador → " +
+          "<b>“Instalar aplicativo”</b> (ou <b>“Adicionar à tela inicial”</b>).");
+      }
     }, 6000);
   }
 })();
+
+/* ══════════════ // CORRIGIDO TV // AVISO DO DOWNLOADER (WEBVIEW) ══════════════
+   Abriu a página dentro de WebView de app (Downloader, etc.)?
+   Mostra o recado para usar o NAVEGADOR da TV. Some sozinho em
+   15s ou quando apertarem OK — e NUNCA bloqueia o app. */
+if (IS_TV && tvWarn){
+  var __ua = navigator.userAgent || "";
+  var isWebView = /\bwv\)/i.test(__ua) || /Downloader/i.test(__ua);
+  if (isWebView){
+    tvWarn.classList.add("show");
+    var tvWarnClose = $("tvWarnClose");
+    if (tvWarnClose) tvWarnClose.addEventListener("click", function(){
+      tvWarn.classList.remove("show");
+    });
+    setTimeout(function(){ tvWarn.classList.remove("show"); }, 15000);
+  }
+}
 
 /* ══════════════ SERVICE WORKER ══════════════ */
 if ("serviceWorker" in navigator){

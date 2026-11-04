@@ -5,10 +5,26 @@ App de rádio ao vivo 24h, instalável no celular (Android e iPhone), que
 **nome da música + a capa oficial do artista** (buscada no Deezer, com
 fallback para iTunes).
 
-**Responsivo de verdade:** celular, tablet, notebook, PC e **TV Android** —
-a partir de 960px vira 2 colunas e na TV o layout fica horizontal (vinil à
-esquerda, música e play à direita), com margem de segurança para o overscan
-e foco visível para navegar com o controle remoto.
+**Responsivo de verdade:** celular, tablet, notebook, PC e **Smart TV**
+(Android TV, Samsung, LG, Fire TV). No celular o layout é o mesmo de
+sempre (card de 400px, vertical — **nada mudou**). Em telas grandes
+(≥1024px, ou ≥800px com altura ≥700px) o card passa a ocupar **96% da
+largura e 92% da altura da tela**, igual a um letreiro de neon:
+
+- **Esquerda:** **SERTANEJA** (laranja neon) / **POP** (rosa neon) + vinil
+  gigante de 380px girando com a capa.
+- **Direita (painel de vidro):** **PLAY verde neon GIGANTE** (até 180px)
+  com o **equalizador colorido** ao lado, rótulo **Now Playing** com a
+  música em 42px, artista, selo **AO VIVO**, volume e o botão
+  **INSTALAR**.
+
+Na **TV** o layout de tela cheia entra SEMPRE (detectado pelo userAgent
+— Tizen, WebOS, Android TV, Fire TV), mesmo que o navegador da TV
+reporte viewport pequeno — acabou a "tirinha fina" no meio da tela. Na
+TV o histórico, a busca e a linha de debug ficam de fora (tela limpa,
+só o player). O controle remoto funciona: **ENTER/OK ou ESPAÇO =
+play/pause**, **SETA ↑/↓ = volume**, com foco verde visível no botão de
+play e aviso para usar o navegador da TV em vez do Downloader.
 
 ## Arquivos
 
@@ -65,7 +81,9 @@ e foco visível para navegar com o controle remoto.
 
 **Android (Chrome):**
 1. Abra o link no Chrome.
-2. Toque no botão laranja **INSTALAR APP** que vai aparecer.
+2. Toque no botão laranja **⬇ INSTALAR APP NA TELA INICIAL** que aparece
+   logo abaixo do volume (ele só aparece quando o Chrome avisa que dá para
+   instalar; depois de instalar ele **some sozinho e não volta mais**).
 3. Pronto — ícone na tela inicial, app em tela cheia.
 
 **iPhone (Safari):**
@@ -77,6 +95,43 @@ e foco visível para navegar com o controle remoto.
 **Teste do segundo plano:** dê o play, apague a tela — a música continua
 e aparece na tela de bloqueio com capa, título e artista, com botões
 play/pause funcionando.
+
+---
+
+## 📺 SMART TV (Android TV, Samsung, LG, Fire TV)
+
+**Abra pelo NAVEGADOR da TV, não pelo Downloader.** O app travou no
+Downloader porque ele é um WebView de app, não um navegador. Use:
+
+| TV | Navegador para usar |
+|---|---|
+| Android TV / Fire TV / Chromecast | **TV Bro** (Play Store) ou **Silk Browser** (Fire Stick) |
+| Samsung (Tizen) | **Samsung Internet** (já vem na TV) |
+| LG (webOS) | **Navegador da TV** |
+| Outras | **Puffin TV Browser** |
+
+Como instalar o TV Bro: Play Store na TV → pesquisar "TV Bro" → instalar →
+abrir → digitar o link do GitHub Pages → OK no controle.
+
+**Controle remoto (funciona dentro do app):**
+- **OK / ENTER / ESPAÇO** = toca ou pausa
+- **SETA PARA CIMA / PARA BAIXO** = volume +5% / −5% (aparece "VOL xx%" na tela)
+- O foco começa **no botão PLAY**, com contorno verde — é só apertar OK.
+
+**Na TV o app fica em tela cheia** (96% × 92% da tela): letreiro
+SERTANEJA (laranja) / POP (rosa) + vinil de 380px à esquerda; painel com
+play verde neon gigante (até 180px), equalizador de 80px, "Now Playing",
+música em 42px, selo AO VIVO e volume à direita — igual à imagem de
+referência. Histórico, busca e debug ficam escondidos na TV.
+
+**Botão INSTALAR na TV:** agora ele **também aparece na TV** quando o
+navegador da TV avisa que dá para instalar (`beforeinstallprompt`) e
+some sozinho depois de instalar. Se o navegador da TV não souber
+instalar (é o caso do Downloader e da maioria deles), o app mostra
+sozinho, depois de 6 segundos, a dica: **abra pelo navegador da TV**
+(TV Bro, Puffin TV, Samsung Internet) — nunca pelo Downloader. Se abrir
+dentro de um app tipo Downloader, o app também mostra um aviso no topo
+dizendo para usar o navegador da TV.
 
 ---
 
@@ -120,8 +175,17 @@ A cada **10 segundos** (só enquanto está tocando) o app lê a música atual:
 - **Capa não muda:** veja a linha de debug no rodapé do app. Ela mostra a
   hora + o status (TOCANDO, buscando capa, ERRO…). Erros de `deezer` são
   normais em algumas redes (o app cai no iTunes automaticamente).
-- **Atualizei o index.html mas o celular mostra o app velho:** aumente a
-  `VERSION` no topo do `service-worker.js` (ex.: `v2` → `v3`) e recarregue.
+- **Atualizei o index.html mas o celular mostra o app velho:** a `VERSION`
+  do `service-worker.js` já está em `v4`; se editar de novo, aumente
+  (`v4` → `v5`) e recarregue.
+- **Na TV ficou uma "tirinha fina" no meio da tela:** era o bug antigo —
+  nesta versão o app detecta a TV pelo userAgent e força o layout de tela
+  cheia em qualquer viewport. Atualize o `service-worker.js` (v4) e feche
+  todas as abas para o Chrome pegar o index novo.
+- **App travou no Downloader da TV:** o Downloader é um WebView limitado.
+  Use o **TV Bro** (Android TV), **Silk** (Fire TV), **Samsung Internet**
+  (Samsung) ou o navegador da LG — o próprio app mostra esse aviso quando
+  detecta WebView.
 - **Subi o manifest novo mas ainda não dá o botão instalar:** o Chrome
   guarda o manifest velho por um tempo. Feche TODAS as abas do app e
   abra o link de novo (ou espere uns minutos / teste em aba anônima).
