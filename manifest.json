@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Sertaneja Pop",
+  "short_name": "SertanejaPop",
+  "description": "Rádio Sertaneja Pop ao vivo 24h — com capa oficial e nome da música em tempo real. Funciona com a tela bloqueada.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080208",
+  "theme_color": "#ff2d55",
+  "categories": ["music", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

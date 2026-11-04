@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Sertaneja Pop • Rádio Ao Vivo 24h</title>
+<meta name="description" content="Rádio Sertaneja Pop ao vivo 24h. Instale o app e ouça com a tela bloqueada, com capa oficial e nome da música em tempo real."/>
+
+<!-- ══════════ PWA ══════════ -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#ff2d55"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SertanejaPop"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+
+<style>
+/* ════════════════════════════════════════════════════════════
+   SERTANEJA POP — estilo neon (rosa #ff2d55 / roxo #7a00ff /
+   laranja #ff9500). Mobile-first, card de vidro, max-width 400px.
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --pink:#ff2d55;
+  --purple:#7a00ff;
+  --orange:#ff9500;
+  --green:#00ff9d;
+  --yellow:#ffe600;
+  --bg:#080208;
+  --card:rgba(255,255,255,.055);
+  --line:rgba(255,255,255,.10);
+  --txt-dim:#c9a9d6;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  display:flex;justify-content:center;
+  overflow-x:hidden;
+}
+/* Brilhos neon fixos ao fundo (não usamos background-attachment:fixed por causa do iOS) */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(58% 38% at 12% -4%, rgba(255,45,85,.42), transparent 62%),
+    radial-gradient(52% 36% at 94% 8%, rgba(122,0,255,.38), transparent 62%),
+    radial-gradient(70% 42% at 50% 104%, rgba(255,149,0,.20), transparent 64%);
+}
+.app{width:100%;max-width:400px;padding:calc(14px + env(safe-area-inset-top)) 14px calc(22px + env(safe-area-inset-bottom))}
+
+/* ── Card de vidro ── */
+.card{
+  background:var(--card);
+  backdrop-filter:blur(24px) saturate(1.3);
+  -webkit-backdrop-filter:blur(24px) saturate(1.3);
+  border:1px solid var(--line);
+  border-radius:32px;
+  padding:22px 18px 18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);
+}
+
+/* ── Topo ── */
+.top{text-align:center}
+.top-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:800;letter-spacing:2.6px;color:#ffd7e0;
+  border:1px solid rgba(255,45,85,.5);background:rgba(255,45,85,.13);
+  padding:7px 15px;border-radius:999px;
+  box-shadow:0 0 18px rgba(255,45,85,.28), inset 0 0 12px rgba(255,45,85,.10);
+}
+h1{
+  margin:14px 0 2px;
+  font-size:clamp(32px,9.5vw,41px);line-height:.95;font-weight:900;letter-spacing:1.5px;
+  background:linear-gradient(94deg,#ff2d55 8%,#ff9500 52%,#ff2d55 94%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 24px rgba(255,45,85,.45));
+}
+
+/* ── Vinil ── */
+.vinyl-zone{position:relative;display:flex;align-items:center;justify-content:center;margin:20px 0 4px;height:calc(min(318px,76vw) + 30px)}
+.aura{
+  position:absolute;width:min(318px,76vw);height:min(318px,76vw);border-radius:50%;
+  background:conic-gradient(from 0deg,#ff2d55,#7a00ff,#ff9500,#ff2d55);
+  filter:blur(26px);opacity:.32;
+  animation:spin 9s linear infinite;animation-play-state:paused;
+}
+.playing .aura{animation-play-state:running;opacity:.5}
+.vinyl{
+  position:relative;width:min(318px,76vw);height:min(318px,76vw);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:repeating-radial-gradient(circle at 50% 50%, #1a1016 0 2px, #26182b 2px 4px);
+  box-shadow:0 24px 60px rgba(0,0,0,.6), inset 0 0 46px rgba(0,0,0,.85);
+  animation:spin 5s linear infinite;animation-play-state:paused;
+}
+.playing .vinyl{animation-play-state:running}
+/* brilho de luz girando sobre o disco */
+.vinyl::before{
+  content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 210deg, rgba(255,255,255,.10), transparent 22%, rgba(255,255,255,.05) 40%, transparent 60%, rgba(255,255,255,.09) 80%, transparent);
+  mix-blend-mode:screen;
+}
+.cover{
+  position:relative;width:min(230px,54vw);height:min(230px,54vw);border-radius:50%;object-fit:cover;
+  border:4px solid rgba(255,255,255,.10);background:#14060f;
+  box-shadow:0 0 0 7px rgba(8,2,8,.92), 0 12px 44px rgba(0,0,0,.6), 0 0 46px rgba(122,0,255,.4);
+}
+.pop-btn{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;
+  width:64px;height:64px;border-radius:50%;cursor:pointer;
+  border:2px solid rgba(255,255,255,.4);
+  font-family:inherit;font-weight:900;font-size:13px;letter-spacing:1.6px;color:#fff;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  box-shadow:0 6px 26px rgba(255,45,85,.55);
+  display:flex;align-items:center;justify-content:center;
+}
+.pop-btn:active{transform:translate(-50%,-50%) scale(.92)}
+
+/* ── Info da música ── */
+.song{margin-top:14px;text-align:center}
+.song-title{
+  font-size:23px;font-weight:800;line-height:1.18;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  text-shadow:0 2px 18px rgba(0,0,0,.5);
+}
+.song-artist{margin-top:5px;font-size:15px;font-weight:600;color:var(--txt-dim);letter-spacing:.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-chip{
+  margin-top:10px;display:inline-flex;gap:7px;align-items:center;
+  font-size:11px;font-weight:800;letter-spacing:2.4px;color:#ff5f7a;
+}
+.live-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--pink);
+  box-shadow:0 0 12px var(--pink);animation:blink 1.2s infinite}
+@keyframes blink{0%,55%{opacity:1}60%,100%{opacity:.15}}
+
+/* ── Equalizador: 20 barras, gradiente verde -> amarelo -> rosa ──
+   A animação é 100% CSS ligada à classe .playing (nada de AnalyserNode,
+   que quebra o segundo plano). */
+.eq{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:44px;margin:16px 0 2px}
+.eq i{
+  width:6px;height:100%;border-radius:3px;
+  transform:scaleY(.12);transform-origin:50% 100%;
+  background:linear-gradient(to top,var(--green) 0%,var(--yellow) 52%,var(--pink) 100%);
+  opacity:.9;
+}
+.playing .eq i{animation-name:eqb;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+@keyframes eqb{from{transform:scaleY(.12)}to{transform:scaleY(1)}}
+
+/* ── Botão PLAY ── */
+.play-row{display:flex;align-items:center;justify-content:center;margin:16px 0 4px}
+.play-btn{
+  width:96px;height:96px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 32% 28%, #8dffcf, var(--green) 58%, #00c46f);
+  box-shadow:0 0 0 6px rgba(0,255,157,.12), 0 12px 44px rgba(0,255,157,.35);
+  transition:transform .12s ease;
+}
+.play-btn:active{transform:scale(.94)}
+.play-btn svg{width:40px;height:40px;fill:#052b18;margin-left:2px}
+.playing .play-btn{animation:pulse 1.5s ease-out infinite}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 6px rgba(0,255,157,.16), 0 12px 44px rgba(0,255,157,.35)}
+  70%{box-shadow:0 0 0 24px rgba(0,255,157,0), 0 12px 44px rgba(0,255,157,.35)}
+  100%{box-shadow:0 0 0 6px rgba(0,255,157,.16), 0 12px 44px rgba(0,255,157,.35)}
+}
+
+/* ── Volume ── */
+.vol{display:flex;align-items:center;gap:10px;margin:12px 8px 0;color:#bfa7cf}
+.vol-ic{width:20px;height:20px;fill:currentColor;flex:none}
+.vol input{
+  flex:1;appearance:none;-webkit-appearance:none;height:6px;border-radius:3px;outline:none;
+  background:linear-gradient(90deg,var(--pink),var(--purple));
+  cursor:pointer;
+}
+.vol input::-webkit-slider-thumb{
+  appearance:none;-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:3px solid var(--pink);
+  box-shadow:0 0 14px rgba(255,45,85,.85);cursor:pointer;
+}
+.vol input::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--pink);
+  box-shadow:0 0 14px rgba(255,45,85,.85);cursor:pointer;
+}
+
+/* ── Seções ── */
+section{margin-top:20px}
+section h2{
+  display:flex;align-items:center;gap:9px;
+  font-size:11.5px;letter-spacing:2.6px;font-weight:800;color:#e5c6ee;
+}
+section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* Histórico */
+.hist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.hist-item{
+  display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:16px;
+  background:rgba(255,255,255,.045);border:1px solid var(--line);
+}
+.hist-item img{width:46px;height:46px;border-radius:10px;object-fit:cover;background:#1c0d18;flex:none}
+.hist-txt{min-width:0}
+.hist-txt .t{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-txt .a{font-size:12px;color:var(--txt-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.hist-empty{font-size:12.5px;color:#a98fb5;padding:4px 2px}
+
+/* Busca manual */
+.search-row{display:flex;gap:8px;margin-top:10px}
+.search-row input{
+  flex:1;min-width:0;padding:12px 14px;border-radius:16px;
+  border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;
+  font-size:14px;font-family:inherit;appearance:none;-webkit-appearance:none;
+}
+.search-row input::placeholder{color:#8d7398}
+.search-row input:focus{outline:none;border-color:rgba(255,45,85,.6)}
+.search-row button{
+  padding:12px 14px;border-radius:16px;border:none;cursor:pointer;flex:none;
+  font-family:inherit;font-weight:800;font-size:13px;color:#fff;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  box-shadow:0 6px 20px rgba(122,0,255,.35);
+}
+.search-row button:disabled{opacity:.6}
+.q-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.q-item{
+  border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;padding:0 0 9px;width:100%;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);font-family:inherit;color:#fff;
+}
+.q-item:active{transform:scale(.97)}
+.q-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#1c0d18}
+.q-item .t{padding:8px 10px 0;font-size:12.5px;font-weight:700;line-height:1.25;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.q-item .a{padding:2px 10px 0;font-size:11.5px;color:var(--txt-dim);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Instalar */
+.install-row{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+#installBtn{
+  padding:15px;border-radius:18px;border:none;cursor:pointer;
+  font-family:inherit;font-weight:900;font-size:14px;letter-spacing:1.4px;color:#fff;
+  background:linear-gradient(135deg,var(--orange),var(--pink));
+  box-shadow:0 10px 32px rgba(255,45,85,.42);
+}
+.ios-hint{
+  display:none;font-size:12.5px;line-height:1.55;color:#ffd9a8;
+  background:rgba(255,149,0,.10);border:1px solid rgba(255,149,0,.38);
+  border-radius:16px;padding:12px 14px;
+}
+.ios-hint.show{display:block}
+
+/* Debug */
+.debug{
+  margin-top:18px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:10.5px;line-height:1.75;color:#9b7fae;word-break:break-word;
+}
+.footer{text-align:center;font-size:9.5px;letter-spacing:2.4px;color:#6e5580;margin-top:14px}
+
+/* Áudio nativo escondido (mantém o atributo controls, mas usamos nossa UI) */
+#audio{position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:350px){
+  h1{font-size:30px}
+  .eq{gap:2px}.eq i{width:5px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+
+    <!-- ── Topo ── -->
+    <header class="top">
+      <span class="top-badge">★ RÁDIO AO VIVO • 24H ★</span>
+      <h1>SERTANEJA POP</h1>
+    </header>
+
+    <!-- ── Vinil + capa + botão POP ── -->
+    <div class="vinyl-zone">
+      <div class="aura"></div>
+      <div class="vinyl">
+        <img id="cover" class="cover" src="icons/icon-512.png" alt="Capa da música"/>
+      </div>
+      <button class="pop-btn" id="popBtn" aria-label="Tocar ou pausar">POP</button>
+    </div>
+
+    <!-- ── Música atual ── -->
+    <div class="song">
+      <div class="song-title" id="songTitle">Toque no PLAY para ouvir</div>
+      <div class="song-artist" id="songArtist">Rádio Sertaneja Pop • 24h ao vivo</div>
+      <div class="live-chip"><span class="dot"></span> AO VIVO</div>
+    </div>
+
+    <!-- ── Equalizador (20 barras geradas via JS) ── -->
+    <div class="eq" id="eq" aria-hidden="true"></div>
+
+    <!-- ── Play + Volume ── -->
+    <div class="play-row">
+      <button class="play-btn" id="playBtn" aria-label="Tocar">
+        <svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5.3v13.4L19 12z"/></svg>
+        <svg id="icPause" viewBox="0 0 24 24" style="display:none;margin-left:0"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>
+      </button>
+    </div>
+    <div class="vol">
+      <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/></svg>
+      <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume"/>
+      <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.6a5 5 0 010 6.8M18.8 6.2a8.2 8.2 0 010 11.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+
+    <!-- ── Histórico ── -->
+    <section>
+      <h2>TOCARAM AGORA POUCO</h2>
+      <div class="hist" id="histList"></div>
+    </section>
+
+    <!-- ── Busca manual de capa ── -->
+    <section>
+      <h2>BUSCAR CAPA</h2>
+      <div class="search-row">
+        <input id="q" type="search" placeholder="Ex: Gusttavo Lima Retrovisor" autocomplete="off"/>
+        <button id="qBtn">Buscar capa</button>
+      </div>
+      <div class="q-results" id="qResults"></div>
+    </section>
+
+    <!-- ── Instalação ── -->
+    <div class="install-row">
+      <button id="installBtn" hidden>INSTALAR APP</button>
+      <div class="ios-hint" id="iosHint">
+        <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
+        <b>“Adicionar à Tela de Início”</b> para instalar o app.
+      </div>
+    </div>
+
+    <!-- ── Debug ── -->
+    <div class="debug" id="debug">—</div>
+  </div>
+  <div class="footer">SERTANEJA POP • 24H AO VIVO • FEITO PARA INSTALAR</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ÁUDIO NATIVO — NÃO trocar por AudioContext/Web Audio API!
+     Web Audio bloqueia o play no mobile e mata o segundo plano.
+     O atributo "controls" fica escondido por CSS (usamos nossa UI).
+     ════════════════════════════════════════════════════════════ -->
+<audio id="audio"
+       src="https://srv3.soundstream.com.br/listen/sertanejapop/radio.mp3"
+       preload="none" controls playsinline></audio>
+
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════════════
+   ⚠️⚠️⚠️  COLA AQUI SEU LINK DO WORKER  ⚠️⚠️⚠️
+   ────────────────────────────────────────────────────────────
+   1) Crie um Cloudflare Worker grátis em https://workers.cloudflare.com
+   2) Cole dentro dele o código do arquivo worker.js e clique em Deploy
+   3) Copie a URL que o Cloudflare te der e cole abaixo, entre as aspas:
+
+        const WORKER_URL = "https://o-nome-que-escolher.sua-conta.workers.dev";
+
+   Enquanto estiver vazio "" o app continua FUNCIONANDO: ele lê a
+   metadata direto da API do servidor (o AzuraCast libera CORS) e busca
+   a capa oficial no Deezer/iTunes pelo próprio navegador.
+   ════════════════════════════════════════════════════════════ */
+const WORKER_URL = "";
+
+/* ── Configurações ── */
+const STREAM_URL   = "https://srv3.soundstream.com.br/listen/sertanejapop/radio.mp3";
+const AZURACAST_API= "https://srv3.soundstream.com.br/api/nowplaying/sertanejapop";
+const META_HOST    = "https://srv3.soundstream.com.br/";
+const PROXY        = "https://api.allorigins.win/get?url=";   // wrapper JSON com .contents
+const POLL_MS      = 10000;  // atualiza título/capa a cada 10s (só quando tocando)
+
+/* ── Elementos ── */
+function $(id){ return document.getElementById(id); }
+var audio=$("audio"), playBtn=$("playBtn"), popBtn=$("popBtn"),
+    icPlay=$("icPlay"), icPause=$("icPause"), coverImg=$("cover"),
+    songTitle=$("songTitle"), songArtist=$("songArtist"),
+    histList=$("histList"), qInput=$("q"), qBtn=$("qBtn"), qResults=$("qResults"),
+    debugEl=$("debug"), volInput=$("vol"),
+    installBtn=$("installBtn"), iosHint=$("iosHint");
+
+/* ── Estado ── */
+var state = { playing:false, raw:"", song:null, history:[] };
+var lastServerRaw = "", manualHold = false, polling = false,
+    everPlayed = false, deferredPrompt = null;
+
+/* Cache de capas já buscadas (evita bater na API do Deezer/iTunes de novo) */
+var coverMemo = {};
+
+/* ══════════════ DEBUG (hora + status) ══════════════ */
+var dbgLines = [];
+function dbg(msg){
+  var t = new Date().toLocaleTimeString("pt-BR");
+  dbgLines.unshift("[" + t + "] " + msg);
+  if (dbgLines.length > 3) dbgLines.length = 3;
+  debugEl.innerHTML = dbgLines.map(function(l){
+    return l.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  }).join("<br>");
+}
+
+/* ══════════════ FETCH com timeout ══════════════ */
+function fetchTimeout(url, opts, ms){
+  opts = opts || {}; ms = ms || 9000;
+  var c = new AbortController();
+  var t = setTimeout(function(){ c.abort(); }, ms);
+  return fetch(url, Object.assign({}, opts, { signal: c.signal }))
+    .finally(function(){ clearTimeout(t); });
+}
+
+/* Proxy allorigins (wrapper /get devolve {contents:"..."}) */
+function viaProxy(url){
+  return fetchTimeout(PROXY + encodeURIComponent(url), {}, 12000)
+    .then(function(r){
+      if (!r.ok) throw new Error("proxy HTTP " + r.status);
+      return r.json();
+    })
+    .then(function(j){
+      var c = j && j.contents;
+      if (!c) throw new Error("proxy vazio");
+      return c;
+    });
+}
+
+/* ══════════════ PARSERS DE METADATA ══════════════ */
+/* AzuraCast (/api/nowplaying) — fonte principal deste servidor */
+function parseAzuracast(j){
+  var np = j && j.now_playing && j.now_playing.song;
+  if (!np) throw new Error("JSON sem now_playing");
+  var raw = np.text || ((np.artist ? np.artist + " - " : "") + (np.title || "")) || "";
+  // A capa do servidor às vezes é a imagem genérica — ignoramos a genérica.
+  var serverArt = (np.art && np.art.indexOf("generic_song") === -1) ? np.art : "";
+  var hist = (j.song_history || []).map(function(h){ return h.song || {}; })
+    .filter(function(s){ return s.text && s.text !== raw; })
+    .slice(0, 4)
+    .map(function(s){
+      return {
+        title: s.title || s.text || "",
+        artist: s.artist || "",
+        raw: s.text || "",
+        cover: (s.art && s.art.indexOf("generic_song") === -1) ? s.art : "",
+        album: s.album || ""
+      };
+    });
+  return {
+    title: np.title || raw,
+    artist: np.artist || "",
+    raw: raw,
+    album: np.album || "",
+    serverArt: serverArt,
+    history: hist
+  };
+}
+
+/* Icecast clássico (status-json.xsl) — fallback se trocarem o servidor */
+function parseIcecastJson(txt){
+  var j = JSON.parse(txt);
+  var s = j && j.icestats && j.icestats.source;
+  if (!s) throw new Error("icestats vazio");
+  var arr = Array.isArray(s) ? s : [s];
+  arr.sort(function(a,b){
+    return (String(b.listenurl||"").indexOf("sertanejapop")!==-1 ? 1:0)
+         - (String(a.listenurl||"").indexOf("sertanejapop")!==-1 ? 1:0);
+  });
+  for (var i=0;i<arr.length;i++){
+    var t = arr[i].title || arr[i].yp_currently_playing || arr[i].server_description || "";
+    if (t) return t;
+  }
+  throw new Error("icecast sem título");
+}
+
+/* Shoutcast v1 (7.html) — último recurso */
+function parseShoutcast7(txt){
+  var m = txt.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (!m) throw new Error("7.html inválido");
+  var p = m[1].split(",");
+  if (p.length >= 6) return p.slice(5, p.length - 1).join(",") || p[5];
+  throw new Error("7.html sem título");
+}
+
+/* Separa "Artista - Música" */
+function splitTitle(raw){
+  var s = String(raw).trim();
+  s = s.replace(/^\s*[\[(]?(ao vivo|live)[\])]?\s*[-–—:]\s*/i, "");
+  var parts = s.split(/\s+[-–—]\s+/);
+  if (parts.length >= 2){
+    return { artist: parts[0].trim(), title: parts.slice(1).join(" - ").trim() };
+  }
+  return { artist: "", title: s };
+}
+
+/* ══════════════ CAPAS (Deezer -> iTunes -> proxy) ══════════════ */
+function deezerUrl(q, limit){
+  return "https://api.deezer.com/search?q=" + encodeURIComponent(q) + "&limit=" + (limit||1);
+}
+function itunesUrl(q, limit){
+  return "https://itunes.apple.com/search?term=" + encodeURIComponent(q) +
+         "&media=music&entity=song&limit=" + (limit||1) + "&country=BR";
+}
+function deezerHit(h){
+  return {
+    title: h.title || "", artist: (h.artist && h.artist.name) || "",
+    album: (h.album && h.album.title) || "",
+    cover: (h.album && (h.album.cover_xl || h.album.cover_big || h.album.cover_medium)) || ""
+  };
+}
+function itunesHit(h){
+  return {
+    title: h.trackName || "", artist: h.artistName || "",
+    album: h.collectionName || "",
+    cover: h.artworkUrl100 ? String(h.artworkUrl100).replace("100x100","600x600") : ""
+  };
+}
+
+/* Busca UMA capa (usada na música atual e no histórico). Resultado em cache. */
+function findCover(artist, title){
+  var q = ((artist ? artist + " " : "") + title).trim();
+  if (!q) return Promise.resolve({ cover:"", album:"" });
+  var key = q.toLowerCase();
+  if (coverMemo[key]) return Promise.resolve(coverMemo[key]);
+
+  var chain = Promise.reject();
+  function step(fn){ chain = chain.catch(fn); }
+
+  /* 1) Deezer direto (se o navegador do usuário conseguir) */
+  step(function(){
+    return fetchTimeout(deezerUrl(q,1), {}, 8000)
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        var hit = j && j.data && j.data[0];
+        if (hit && hit.album && hit.album.cover_xl)
+          return { cover: hit.album.cover_xl, album: hit.album.title || "" };
+        throw new Error("deezer sem resultado");
+      });
+  });
+  /* 2) iTunes direto (CORS garantido) */
+  step(function(){
+    return fetchTimeout(itunesUrl(q,1), {}, 8000)
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        var hit = j && j.results && j.results[0];
+        if (hit && hit.artworkUrl100) return itunesHit(hit);
+        throw new Error("itunes sem resultado");
+      });
+  });
+  /* 3) Deezer via proxy */
+  step(function(){
+    return viaProxy(deezerUrl(q,1)).then(function(txt){
+      var j = JSON.parse(txt);
+      var hit = j && j.data && j.data[0];
+      if (hit && hit.album && hit.album.cover_xl)
+        return { cover: hit.album.cover_xl, album: hit.album.title || "" };
+      throw new Error("deezer/proxy sem resultado");
+    });
+  });
+  /* 4) iTunes via proxy */
+  step(function(){
+    return viaProxy(itunesUrl(q,1)).then(function(txt){
+      var j = JSON.parse(txt);
+      var hit = j && j.results && j.results[0];
+      if (hit && hit.artworkUrl100) return itunesHit(hit);
+      throw new Error("itunes/proxy sem resultado");
+    });
+  });
+
+  return chain
+    .then(function(res){ coverMemo[key] = res; return res; })
+    .catch(function(){ var e = { cover:"", album:"" }; coverMemo[key] = e; return e; });
+}
+
+/* Busca VÁRIAS capas (campo de busca manual) — devolve até 8 resultados */
+function searchCovers(q){
+  /* 1) Worker (se configurado, tem modo de busca ?q=) */
+  var chain = WORKER_URL
+    ? fetchTimeout(WORKER_URL + "?q=" + encodeURIComponent(q), {}, 10000)
+        .then(function(r){
+          if (!r.ok) throw new Error("worker HTTP " + r.status);
+          return r.json();
+        })
+        .then(function(j){
+          if (j.results && j.results.length) return j.results;
+          throw new Error("worker sem resultados");
+        })
+        .catch(function(e){ dbg("worker de busca falhou, tentando proxy…"); throw e; })
+    : Promise.reject();
+  /* 2) iTunes direto (CORS garantido e resposta rápida) */
+  chain = chain.catch(function(){
+    return fetchTimeout(itunesUrl(q,4), {}, 9000)
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (j && j.results && j.results.length) return j.results.map(itunesHit);
+        throw new Error("itunes vazio");
+      });
+  });
+  /* 3) Deezer via proxy */
+  chain = chain.catch(function(){
+    return viaProxy(deezerUrl(q,4)).then(function(txt){
+      var j = JSON.parse(txt);
+      if (j && j.data && j.data.length) return j.data.map(deezerHit);
+      throw new Error("deezer/proxy vazio");
+    });
+  });
+  /* 4) iTunes via proxy */
+  chain = chain.catch(function(){
+    return viaProxy(itunesUrl(q,4)).then(function(txt){
+      var j = JSON.parse(txt);
+      if (j && j.results && j.results.length) return j.results.map(itunesHit);
+      throw new Error("itunes/proxy vazio");
+    });
+  });
+  return chain;
+}
+
+/* ══════════════ FONTE DA MÚSICA ATUAL ══════════════ */
+/* Retorna {title, artist, raw, cover, album, coverPromise, history} */
+function fetchNowPlaying(){
+  /* Caminho 1: WORKER configurado — ele já devolve tudo pronto */
+  if (WORKER_URL){
+    return fetchTimeout(WORKER_URL, {}, 10000).then(function(r){
+      if (!r.ok) throw new Error("worker HTTP " + r.status);
+      return r.json();
+    }).then(function(j){
+      if (!j.raw && !j.title) throw new Error("worker sem dados");
+      return {
+        title: j.title || "", artist: j.artist || "", raw: j.raw || j.title || "",
+        cover: j.cover || "", album: j.album || "",
+        coverPromise: null, history: j.history || []
+      };
+    });
+  }
+  /* Caminho 2: API do AzuraCast DIRETO (libera Access-Control-Allow-Origin: *) */
+  var viaDirect = fetchTimeout(AZURACAST_API, {}, 9000).then(function(r){
+    if (!r.ok) throw new Error("servidor HTTP " + r.status);
+    return r.json();
+  }).then(parseAzuracast);
+
+  /* Caminho 3: mesmo endpoint via proxy allorigins (se a rede bloquear) */
+  var viaProxyChain = viaDirect.catch(function(directErr){
+    return viaProxy(AZURACAST_API).then(function(txt){
+      return parseAzuracast(JSON.parse(txt));
+    }).catch(function(){
+      throw directErr;
+    });
+  });
+
+  return viaProxyChain.then(function(meta){
+    /* Capa: tenta as oficiais (Deezer/iTunes) em paralelo.
+       Se falharem, usa a arte do próprio servidor (se não for genérica). */
+    var base = {
+      title: meta.title, artist: meta.artist, raw: meta.raw, album: meta.album,
+      cover: meta.serverArt || "", coverPromise: null, history: meta.history
+    };
+    base.coverPromise = findCover(meta.artist, meta.title)
+      .then(function(cv){
+        if (cv.cover) return cv;
+        if (meta.serverArt) return { cover: meta.serverArt, album: meta.album };
+        return { cover:"", album:"" };
+      });
+    if (base.cover) dbg("buscando capa oficial…");
+    return base;
+  });
+}
+
+/* ══════════════ POLLING (a cada 10s, só quando tocando) ══════════════ */
+function pollNow(){
+  if (!state.playing || polling) return;
+  polling = true;
+  fetchNowPlaying()
+    .then(function(data){
+      if (!data.raw){ dbg("Servidor sem metadata agora"); return; }
+      var mudou = data.raw !== state.raw;
+      if (mudou){
+        if (state.song) pushHistory(state.song);
+        manualHold = false;
+        setSong(data);
+        dbg("TOCANDO • " + data.raw);
+      } else if (state.song && !state.song.cover && data.cover){
+        setSong({ cover: data.cover, album: data.album }); // capa chegou depois
+      }
+      /* capa oficial resolve em paralelo */
+      if (data.coverPromise){
+        data.coverPromise.then(function(cv){
+          if (cv && cv.cover && state.raw === data.raw && !state.song.cover){
+            setSong({ cover: cv.cover, album: cv.album || "" });
+          }
+        }).catch(function(){});
+      }
+      /* semeia o histórico do servidor na 1ª leitura */
+      if (data.history && data.history.length && !state.history.length){
+        seedHistory(data.history);
+      }
+      if (!mudou) dbg("OK • " + data.raw);
+    })
+    .catch(function(e){
+      dbg("ERRO metadata: " + (e && e.message ? e.message : e));
+    })
+    .finally(function(){ polling = false; });
+}
+
+/* ══════════════ UI DA MÚSICA + MEDIA SESSION ══════════════ */
+function artworkFor(cover){
+  if (!cover) return [{ src:"icons/icon-512.png", sizes:"512x512", type:"image/png" }];
+  var sizes = cover.indexOf("mzstatic") !== -1 ? "600x600" : "1000x1000";
+  return [{ src: cover, sizes: sizes, type: "image/jpeg" }];
+}
+
+function setMediaSession(song){
+  if (!("mediaSession" in navigator)) return;
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title || "Sertaneja Pop ao vivo",
+      artist: song.artist || "Rádio Sertaneja Pop",
+      album: song.album || "Sertaneja Pop • 24h",
+      artwork: artworkFor(song.cover)
+    });
+  }catch(e){ /* navegador sem MediaMetadata */ }
+}
+
+function setSong(partial){
+  state.song = Object.assign({}, state.song || {}, partial);
+  state.raw = state.song.raw || "";
+  songTitle.textContent = state.song.title || "Sertaneja Pop ao vivo";
+  songArtist.textContent = state.song.artist || "Rádio Sertaneja Pop • 24h";
+  var cv = state.song.cover || "icons/icon-512.png";
+  if (coverImg.getAttribute("src") !== cv) coverImg.src = cv;
+  setMediaSession(state.song);
+}
+
+/* ══════════════ HISTÓRICO (últimas 4) ══════════════ */
+function pushHistory(song){
+  if (!song || !song.title) return;
+  state.history = [song].concat(
+    state.history.filter(function(h){ return h.raw !== song.raw; })
+  ).slice(0, 4);
+  resolveHistCover(song);
+  renderHistory();
+}
+
+/* Semeia o histórico com song_history do servidor (1ª leitura) */
+function seedHistory(list){
+  state.history = list.slice(0, 4);
+  state.history.forEach(resolveHistCover);
+  renderHistory();
+}
+
+/* Completa a capa de um item do histórico em segundo plano */
+function resolveHistCover(item){
+  if (item.cover) return;
+  findCover(item.artist, item.title).then(function(cv){
+    if (cv.cover){
+      item.cover = cv.cover;
+      item.album = item.album || cv.album || "";
+      renderHistory();
+    }
+  }).catch(function(){});
+}
+
+function renderHistory(){
+  histList.innerHTML = "";
+  if (!state.history.length){
+    var p = document.createElement("div");
+    p.className = "hist-empty";
+    p.textContent = "As últimas músicas tocadas vão aparecer aqui.";
+    histList.appendChild(p);
+    return;
+  }
+  state.history.forEach(function(h){
+    var row = document.createElement("div"); row.className = "hist-item";
+    var img = document.createElement("img");
+    img.src = h.cover || "icons/icon-192.png"; img.alt = "Capa";
+    img.onerror = function(){ img.src = "icons/icon-192.png"; };
+    var box = document.createElement("div"); box.className = "hist-txt";
+    var t = document.createElement("div"); t.className = "t";
+    t.textContent = h.title || "—";
+    var a = document.createElement("div"); a.className = "a";
+    a.textContent = h.artist || "Artista desconhecido";
+    box.appendChild(t); box.appendChild(a);
+    row.appendChild(img); row.appendChild(box);
+    histList.appendChild(row);
+  });
+}
+
+/* ══════════════ PLAY / PAUSE ══════════════ */
+function startRadio(){
+  dbg("Conectando ao stream…");
+  try{
+    audio.src = STREAM_URL;   // religa sempre na ponta AO VIVO
+    audio.load();
+    var p = audio.play();
+    if (p && p.catch) p.catch(function(e){
+      dbg("Erro ao tocar: " + (e && e.name ? e.name : e));
+    });
+  }catch(e){
+    dbg("Erro ao tocar: " + e.message);
+  }
+}
+function togglePlay(){
+  if (state.playing){ audio.pause(); }
+  else { startRadio(); }
+}
+function setPlaying(on){
+  if (state.playing === on) return;
+  state.playing = on;
+  document.body.classList.toggle("playing", on);
+  icPlay.style.display  = on ? "none" : "block";
+  icPause.style.display = on ? "block" : "none";
+  playBtn.setAttribute("aria-label", on ? "Pausar" : "Tocar");
+  dbg(on ? "▶ TOCANDO" : "⏸ PAUSADO");
+}
+
+playBtn.addEventListener("click", togglePlay);
+popBtn.addEventListener("click", togglePlay);
+
+/* Eventos do <audio> */
+audio.addEventListener("playing", function(){
+  everPlayed = true;
+  setPlaying(true);
+  pollNow();
+});
+audio.addEventListener("pause", function(){ setPlaying(false); });
+audio.addEventListener("waiting", function(){ if (state.playing) dbg("Buffering…"); });
+audio.addEventListener("stalled", function(){ if (state.playing) dbg("Stream lento…"); });
+audio.addEventListener("error", function(){
+  if (!everPlayed){ dbg("Erro ao iniciar o stream"); return; }
+  if (!state.playing) return;
+  dbg("Stream caiu. Reconectando em 5s…");
+  setTimeout(function(){ if (state.playing) startRadio(); }, 5000);
+});
+
+/* Volume (no iPhone o volume segue o do sistema e o slider não tem efeito) */
+volInput.addEventListener("input", function(){
+  try{ audio.volume = volInput.value / 100; }catch(e){}
+});
+
+/* Trocar de aba / apagar a tela: NÃO pausamos nada de propósito.
+   O <audio> nativo + MediaSession mantêm a música no segundo plano. */
+document.addEventListener("visibilitychange", function(){ /* intencional */ });
+
+/* ══════════════ MEDIA SESSION (tela de bloqueio) ══════════════ */
+if ("mediaSession" in navigator){
+  var ms = navigator.mediaSession;
+  try{ ms.setActionHandler("play", startRadio); }catch(e){}
+  try{ ms.setActionHandler("pause", function(){ audio.pause(); }); }catch(e){}
+  try{ ms.setActionHandler("stop", function(){ audio.pause(); }); }catch(e){}
+  /* Rádio ao vivo: next/previous apenas religam no ao vivo */
+  try{ ms.setActionHandler("previoustrack", startRadio); }catch(e){}
+  try{ ms.setActionHandler("nexttrack", startRadio); }catch(e){}
+}
+
+/* ══════════════ BUSCA MANUAL DE CAPA ══════════════ */
+function runSearch(){
+  var q = qInput.value.trim();
+  if (!q){ dbg("Digite o nome da música para buscar a capa"); return; }
+  qBtn.disabled = true; qBtn.textContent = "Buscando…";
+  dbg("Buscando capa: " + q);
+  searchCovers(q)
+    .then(function(res){
+      renderResults(res.slice(0, 4));
+      dbg("Busca OK • " + Math.min(res.length, 4) + " resultado(s)");
+    })
+    .catch(function(e){
+      qResults.innerHTML = "";
+      dbg("ERRO na busca: " + (e && e.message ? e.message : e));
+    })
+    .finally(function(){
+      qBtn.disabled = false; qBtn.textContent = "Buscar capa";
+    });
+}
+function renderResults(list){
+  qResults.innerHTML = "";
+  if (!list.length){
+    var p = document.createElement("div");
+    p.className = "hist-empty";
+    p.textContent = "Nenhum resultado encontrado.";
+    qResults.appendChild(p);
+    return;
+  }
+  list.forEach(function(r){
+    var b = document.createElement("button");
+    b.className = "q-item"; b.type = "button";
+    var img = document.createElement("img");
+    img.src = r.cover || "icons/icon-192.png"; img.alt = "";
+    img.onerror = function(){ img.src = "icons/icon-192.png"; };
+    var t = document.createElement("div"); t.className = "t";
+    t.textContent = r.title || "—";
+    var a = document.createElement("div"); a.className = "a";
+    a.textContent = r.artist || "Artista desconhecido";
+    b.appendChild(img); b.appendChild(t); b.appendChild(a);
+    b.addEventListener("click", function(){
+      setSong({
+        title: r.title, artist: r.artist, album: r.album || "",
+        cover: r.cover, raw: "manual:" + r.title
+      });
+      manualHold = true; // segura até o servidor anunciar outra música
+      dbg("Capa aplicada manualmente: " + r.title);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    qResults.appendChild(b);
+  });
+}
+qBtn.addEventListener("click", runSearch);
+qInput.addEventListener("keydown", function(e){ if (e.key === "Enter") runSearch(); });
+
+/* ══════════════ INSTALAÇÃO PWA ══════════════ */
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.hidden = false;
+  dbg("App pronto para instalar");
+});
+installBtn.addEventListener("click", function(){
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(choice){
+    dbg("Instalação: " + choice.outcome);
+    if (choice.outcome === "accepted") installBtn.hidden = true;
+    deferredPrompt = null;
+  });
+});
+window.addEventListener("appinstalled", function(){
+  installBtn.hidden = true;
+  dbg("App instalado com sucesso!");
+});
+(function(){
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var standalone = window.matchMedia("(display-mode: standalone)").matches ||
+                   window.navigator.standalone === true;
+  if (isIOS && !standalone) iosHint.classList.add("show");
+  if (standalone) dbg("Rodando como app instalado");
+})();
+
+/* ══════════════ SERVICE WORKER ══════════════ */
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("service-worker.js")
+      .catch(function(e){ dbg("Service worker: " + e.message); });
+  });
+}
+
+/* ══════════════ EQUALIZADOR (20 barras, só CSS anima) ══════════════ */
+(function(){
+  var eq = $("eq");
+  var dur = [.62,.78,.55,.9,.68,.74,.6,.85,.7,.58,.8,.66,.9,.6,.76,.55,.84,.7,.62,.8];
+  for (var i = 0; i < 20; i++){
+    var b = document.createElement("i");
+    b.style.animationDuration = dur[i] + "s";
+    b.style.animationDelay = (i * 0.09) + "s";
+    eq.appendChild(b);
+  }
+})();
+
+/* ══════════════ INICIALIZAÇÃO ══════════════ */
+renderHistory();
+try{ audio.volume = volInput.value / 100; }catch(e){}
+dbg("Pronto. Toque no PLAY para começar");
+setInterval(pollNow, POLL_MS); // leve: só lê capa/título; continua rodando em background
+</script>
+</body>
+</html>
