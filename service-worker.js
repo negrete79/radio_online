@@ -7,7 +7,7 @@
    • Para forçar atualização do app depois de editar o index.html,
      troque a versão abaixo (ex.: v2).
    ════════════════════════════════════════════════════════════ */
-const VERSION = "v4";
+const VERSION = "v6";
 const CACHE = "sertanejapop-shell-" + VERSION;
 
 const SHELL = [

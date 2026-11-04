@@ -8,7 +8,7 @@
 
 <!-- ══════════ PWA ══════════ -->
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#ff2d55"/>
+<meta name="theme-color" content="#ff2d78"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -290,6 +290,15 @@ section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,
   border-radius:16px;padding:12px 14px;
 }
 .ios-hint.show{display:block}
+/* // CORRIGIDO INSTALAR // passo a passo quando o navegador não
+   oferece a janela nativa de instalação (TV/Downloader, Firefox,
+   WebView de outro app…). O clique no botão INSTALAR abre este box. */
+.install-help{
+  font-size:12.5px;line-height:1.6;color:#ffe6c4;
+  background:rgba(255,149,0,.12);border:1px solid rgba(255,149,0,.42);
+  border-radius:16px;padding:12px 14px;
+}
+.install-help b{color:#fff}
 
 /* Debug */
 .debug{
@@ -609,18 +618,21 @@ html.tv .side-col,html.tv .footer{display:none!important}
 
       <!-- ══ // CORRIGIDO INSTALAR // botão de instalação ══
            Fica logo abaixo do volume (bem visível ao abrir).
-           Aparece SÓ quando o navegador avisa que dá para instalar
-           (evento beforeinstallprompt) e SOME sozinho após instalar
-           (appinstalled / modo standalone / iOS / já instalou antes).
-           No iPhone mostra a dica “Adicionar à Tela de Início”;
-           na Smart TV TAMBÉM aparece quando o navegador da TV
-           permite instalar (// CORRIGIDO INSTALAR //). -->
+           APARECE DESDE JÁ no celular, no PC e TAMBÉM na Smart TV /
+           Downloader — NÃO depende mais do evento beforeinstallprompt,
+           que na TV e em WebView NUNCA dispara (era o motivo de o
+           botão não aparecer lá). O clique abre a janela nativa de
+           instalação quando o navegador oferece; quando não oferece,
+           mostra o PASSO A PASSO. SOME sozinho quando o app instala
+           de verdade (appinstalled / modo standalone / iOS). No iPhone
+           mostra a dica “Adicionar à Tela de Início”. -->
       <div class="install-row">
         <button id="installBtn" hidden>⬇ INSTALAR APP NA TELA INICIAL</button>
         <div class="ios-hint" id="iosHint">
           <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
           <b>“Adicionar à Tela de Início”</b> para instalar o app.
         </div>
+        <div class="install-help" id="installHelp" hidden></div>
         <div class="diag-warn" id="diag"></div>
       </div>
     </div><!-- /.col-right -->
@@ -652,9 +664,10 @@ html.tv .side-col,html.tv .footer{display:none!important}
 
 <!-- ══ // CORRIGIDO TV // aviso para quem abriu pelo Downloader (WebView) ══ -->
 <div class="tv-warn" id="tvWarn" role="alert">
-  <b>📺 Smart TV detectada.</b> Se a página travar ou não abrir, NÃO use o app
-  <b>Downloader</b> — abra pelo <b>navegador da TV</b>
-  (TV Bro, Samsung Internet, Silk Browser ou Puffin TV).
+  <b>📺 Smart TV detectada.</b> Pelo app <b>Downloader</b> NÃO dá para instalar —
+  ele é só uma janela. Abra pelo <b>navegador da TV</b>
+  (TV Bro, Samsung Internet, Silk Browser ou Puffin TV) e toque em
+  <b>⬇ INSTALAR</b>.
   <button id="tvWarnClose" type="button">OK</button>
 </div>
 
@@ -702,7 +715,7 @@ var audio=$("audio"), playBtn=$("playBtn"), popBtn=$("popBtn"),
     songTitle=$("songTitle"), songArtist=$("songArtist"),
     histList=$("histList"), qInput=$("q"), qBtn=$("qBtn"), qResults=$("qResults"),
     debugEl=$("debug"), volInput=$("vol"),
-    installBtn=$("installBtn"), iosHint=$("iosHint"),
+    installBtn=$("installBtn"), iosHint=$("iosHint"), installHelp=$("installHelp"),
     volToast=$("volToast"), tvWarn=$("tvWarn");
 
 /* ══════════════ // CORRIGIDO TV // DETECÇÃO + CONTROLE REMOTO ══════════════
@@ -1300,15 +1313,19 @@ function hideDiag(){ if (diagEl) diagEl.classList.remove("show"); }
 
 /* ══════════════ // CORRIGIDO INSTALAR // BOTÃO QUE APARECE E SOME ══════════════
    Regras:
-   • Aparece SÓ se: app NÃO instalado + beforeinstallprompt disparou.
+   • APARECE DESDE O CARREGAMENTO em qualquer navegador onde o app
+     ainda não está instalado — celular, PC e TAMBÉM Smart TV e
+     Downloader (o beforeinstallprompt NUNCA dispara na TV/WebView:
+     esperar por ele era o motivo de o botão não aparecer lá).
+   • O clique abre a janela nativa quando o navegador oferece
+     (beforeinstallprompt); se não oferece (TV, Downloader, Firefox,
+     WebView), mostra o PASSO A PASSO — o botão nunca fica sem
+     resposta (era isso que os navegadores "não aceitavam").
    • SOME para sempre quando: appinstalled, ou rodando em modo
      standalone (aberto pela ícone), ou iOS com navigator.standalone,
      ou se o usuário já instalou antes (marcado no localStorage).
    • iPhone (não tem beforeinstallprompt): mostra a dica
-     “Compartilhar > Adicionar à Tela de Início” no lugar do botão.
-   • Smart TV: TAMBÉM aparece — se o navegador da TV permitir
-     instalar (// CORRIGIDO INSTALAR //); se não permitir, a dica
-     de 6s ensina a abrir pelo navegador certo da TV. */
+     “Compartilhar > Adicionar à Tela de Início” no lugar do botão. */
 function isStandalone(){
   return window.matchMedia("(display-mode: standalone)").matches ||
          window.matchMedia("(display-mode: fullscreen)").matches ||
@@ -1321,6 +1338,7 @@ try{ store = window.localStorage; store.getItem("sp_installed"); }catch(e){ stor
 function hideInstallUI(){
   installBtn.hidden = true;
   iosHint.classList.remove("show");
+  if (installHelp) installHelp.hidden = true;   /* // CORRIGIDO INSTALAR // */
 }
 function markInstalled(why){
   state.installed = true;
@@ -1329,34 +1347,78 @@ function markInstalled(why){
   dbg("App instalado ✓ " + (why || ""));
 }
 
+/* // CORRIGIDO INSTALAR // PASSO A PASSO — aparece quando o navegador
+   não tem a janela nativa de instalação (Smart TV, Downloader,
+   Firefox, WebView de outro app…). Cada plataforma ganha o caminho
+   certo, então o botão INSTALAR resolve em TODOS os navegadores. */
+function showInstallHelp(){
+  if (!installHelp) return;
+  var ua = navigator.userAgent || "";
+  var html;
+  if (IS_TV){
+    html = "💡 <b>Instalar na TV:</b> o app <b>Downloader</b> é só uma janela — por ele " +
+      "NÃO dá para instalar. Abra este endereço pelo <b>navegador da TV</b> " +
+      "(TV Bro, Samsung Internet, Silk ou Puffin TV) e no menu do navegador use " +
+      "<b>“Instalar aplicativo”</b> ou <b>“Adicionar atalho / à tela inicial”</b>.";
+  } else if (IS_IOS){
+    html = "💡 <b>iPhone/iPad:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) → " +
+      "<b>“Adicionar à Tela de Início”</b>.";
+  } else if (/firefox/i.test(ua) && !/android/i.test(ua)){
+    html = "💡 O <b>Firefox</b> do computador não instala apps PWA. Abra este endereço no " +
+      "<b>Chrome</b> ou <b>Edge</b> e aí sim toque em <b>INSTALAR</b>.";
+  } else if (/edg\//i.test(ua)){
+    html = "💡 No <b>Edge</b>: menu <b>⋯</b> → <b>Apps</b> → " +
+      "<b>“Instalar este site como um aplicativo”</b>.";
+  } else if (/samsungbrowser/i.test(ua)){
+    html = "💡 No <b>Samsung Internet</b>: menu <b>☰</b> → <b>“Adicionar página a”</b> → " +
+      "<b>“Tela inicial do aparelho”</b> (em versões novas: <b>“Instalar”</b>).";
+  } else if (/android/i.test(ua)){
+    html = "💡 No <b>Chrome</b>: menu <b>⋮</b> → " +
+      "<b>“Instalar aplicativo”</b> ou <b>“Adicionar à tela inicial”</b>.";
+  } else {
+    html = "💡 No <b>Chrome/Edge</b> do computador: clique no ícone <b>⊕</b> na barra de " +
+      "endereço (ou menu <b>⋮</b> → <b>“Instalar aplicativo”</b>).";
+  }
+  installHelp.innerHTML = html;
+  installHelp.hidden = false;
+}
+
 state.installed = (store && store.getItem("sp_installed") === "1") || isStandalone();
 if (state.installed){
   hideInstallUI();
   dbg("Rodando como app instalado ✓");
 } else if (IS_IOS){
   iosHint.classList.add("show");   /* iPhone: dica no lugar do botão */
+} else {
+  /* // CORRIGIDO INSTALAR // VISÍVEL DESDE JÁ — celular, PC e TAMBÉM
+     a Smart TV / Downloader. Sem depender de beforeinstallprompt. */
+  installBtn.hidden = false;
 }
-/* // CORRIGIDO INSTALAR // a TV NÃO esconde mais o botão: se o
-   navegador da TV souber instalar (beforeinstallprompt), o botão
-   INSTALAR aparece igual no celular e some depois de instalar. */
 
-/* O navegador avisou que DÁ para instalar? AGORA o botão aparece */
+/* O navegador avisou que DÁ para instalar: o clique passa a abrir a
+   janela nativa // CORRIGIDO INSTALAR // (o botão já está visível) */
 window.addEventListener("beforeinstallprompt", function(e){
   e.preventDefault();
   deferredPrompt = e;
-  if (!state.installed) installBtn.hidden = false;  /* // CORRIGIDO INSTALAR // vale pra TV também */
+  if (!state.installed) installBtn.hidden = false;
   hideDiag(); /* instalável de verdade — some com avisos */
   dbg("App pronto para instalar ✓");
 });
 installBtn.addEventListener("click", function(){
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function(choice){
-    dbg("Instalação: " + choice.outcome);
-    if (choice.outcome === "accepted") markInstalled("pelo botão");
-    else hideInstallUI();  /* dispensou: some (o Chrome não pergunta de novo na sessão) */
-    deferredPrompt = null;
-  });
+  /* // CORRIGIDO INSTALAR // tem janela nativa? abre. Não tem
+     (TV/Downloader, Firefox, WebView…)? mostra o PASSO A PASSO —
+     antes o botão não fazia nada sem o evento beforeinstallprompt. */
+  if (deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(choice){
+      dbg("Instalação: " + choice.outcome);
+      if (choice.outcome === "accepted") markInstalled("pelo botão");
+      else hideInstallUI();  /* dispensou: some (o Chrome não pergunta de novo na sessão) */
+      deferredPrompt = null;
+    });
+  } else {
+    showInstallHelp();
+  }
 });
 /* Instalou AGORA (com o app aberto): some na hora */
 window.addEventListener("appinstalled", function(){ markInstalled("evento appinstalled"); });
@@ -1405,13 +1467,16 @@ else if (mqStandalone.addListener) mqStandalone.addListener(onStandaloneChange);
   }).then(function(m){
     if (!m || !m.name || !m.icons || !m.icons.length)
       throw new Error("manifest incompleto");
-    /* A pasta icons/ NÃO é mais obrigatória: os ícones vêm embutidos
-       dentro do manifest (base64), então o app instala mesmo sem ela.
-       Se faltar, avisamos de leve na linha de debug. */
+    /* Os ícones são arquivos EXTERNOS na pasta icons/ (PWABuilder
+       não aceita base64 no manifest). Se faltar, o app NÃO instala —
+       avisamos na hora com a solução. */
     var ic = new Image();
     ic.onload = function(){ dbg("Ícones do servidor OK"); };
     ic.onerror = function(){
-      dbg("icons/ não subiu — usando ícone embutido (instala normal)");
+      showDiag("⚠️ <b>Ícones não encontrados (pasta icons/).</b><br>" +
+        "O Chrome só instala se <b>icons/icon-192.png</b> e <b>icons/icon-512.png</b> " +
+        "existirem no servidor. Suba a pasta <b>icons/</b> na raiz do repositório " +
+        "junto com o index.html e o manifest.json.");
     };
     ic.src = "icons/icon-192.png";
   }).catch(function(e){
@@ -1421,20 +1486,16 @@ else if (mqStandalone.addListener) mqStandalone.addListener(onStandaloneChange);
       "Sem ele o app não instala.");
   });
 
-  /* 5) Se em 6s o botão não apareceu e não há aviso grave, ensina o
-     caminho manual // CORRIGIDO INSTALAR // com texto certo pra TV */
+  /* 5) // CORRIGIDO INSTALAR // o botão já fica visível desde o início;
+     se em 6s NÃO chegou a janela nativa de instalação, mostra o
+     passo a passo (texto certo para TV / celular / PC) — assim o
+     usuário nunca fica sem saber por que o navegador "não aceita"
+     instalar sozinho. */
   if (!IS_IOS){
     setTimeout(function(){
-      if (deferredPrompt || !installBtn.hidden) return;
-      if (diagEl && diagEl.classList.contains("show")) return;
-      if (IS_TV){
-        showDiag("💡 <b>Para instalar na TV:</b> abra pelo <b>navegador da TV</b> " +
-          "(TV Bro, Puffin TV, Samsung Internet…) — não pelo Downloader — e use o " +
-          "menu do navegador → <b>“Instalar aplicativo”</b>.");
-      } else {
-        showDiag("💡 <b>Para instalar:</b> menu <b>⋮</b> do navegador → " +
-          "<b>“Instalar aplicativo”</b> (ou <b>“Adicionar à tela inicial”</b>).");
-      }
+      if (deferredPrompt) return;                               /* janela nativa disponível */
+      if (diagEl && diagEl.classList.contains("show")) return;  /* problema mais grave */
+      showInstallHelp();
     }, 6000);
   }
 })();

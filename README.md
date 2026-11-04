@@ -31,10 +31,10 @@ play e aviso para usar o navegador da TV em vez do Downloader.
 | Arquivo | Para que serve |
 |---|---|
 | `index.html` | O app inteiro (visual + lógica). Único arquivo que você precisa editar. |
-| `manifest.json` | Faz o app ser instalável. **Os ícones já vêm embutidos dentro dele** (base64), então a pasta `icons/` é opcional. |
+| `manifest.json` | Faz o app ser instalável. Usa **ícones externos** da pasta `icons/` (sem base64 — exigência do PWABuilder). |
 | `service-worker.js` | Guarda a interface em cache p/ abrir offline. **Nunca** cacheia o áudio. |
 | `worker.js` | Código do Cloudflare Worker (metadata + capa oficial). Só roda na Cloudflare. |
-| `icons/` | Ícones 192/512 + maskable + apple-touch (nota musical rosa). **Opcional** — sem ela o app instala do mesmo jeito (ícone vem do manifest). |
+| `icons/` | Ícones 192/512 + maskable + apple-touch (nota musical rosa). **Obrigatória** — o manifest aponta para esses arquivos; sem eles o Chrome não deixa instalar. |
 
 ---
 
@@ -70,9 +70,11 @@ play e aviso para usar o navegador da TV em vez do Downloader.
 
 1. Crie um repositório no GitHub (ex.: `sertaneja-pop`).
 2. Envie `index.html`, `manifest.json` e `service-worker.js` na raiz do
-   repositório. A pasta `icons/` é **opcional** (o manifest já tem os
-   ícones embutidos), mas pode subir junto. (`worker.js` é só da
-   Cloudflare, mas pode subir também, não atrapalha.)
+   repositório. A pasta `icons/` é **obrigatória** — o manifest aponta
+   para `icons/icon-192.png`, `icons/icon-512.png` e
+   `icons/icon-512-maskable.png`, e sem esses arquivos o Chrome não
+   deixa instalar. (`worker.js` é só da Cloudflare, mas pode subir
+   também, não atrapalha.)
 3. Em **Settings → Pages**, em *Branch* escolha `main` / `/ (root)` e
    **Save**. Em ~1 minuto o link fica no ar:
    `https://seu-usuario.github.io/sertaneja-pop/`
@@ -82,8 +84,11 @@ play e aviso para usar o navegador da TV em vez do Downloader.
 **Android (Chrome):**
 1. Abra o link no Chrome.
 2. Toque no botão laranja **⬇ INSTALAR APP NA TELA INICIAL** que aparece
-   logo abaixo do volume (ele só aparece quando o Chrome avisa que dá para
-   instalar; depois de instalar ele **some sozinho e não volta mais**).
+   logo abaixo do volume (**ele já fica visível ao abrir** — não depende
+   de aviso do Chrome). Se o Chrome oferecer a janela nativa, o clique
+   abre a instalação; se não oferecer, o clique mostra o **passo a
+   passo** (menu ⋮ → Instalar aplicativo). Depois de instalar ele
+   **some sozinho e não volta mais**.
 3. Pronto — ícone na tela inicial, app em tela cheia.
 
 **iPhone (Safari):**
@@ -124,13 +129,19 @@ play verde neon gigante (até 180px), equalizador de 80px, "Now Playing",
 música em 42px, selo AO VIVO e volume à direita — igual à imagem de
 referência. Histórico, busca e debug ficam escondidos na TV.
 
-**Botão INSTALAR na TV:** agora ele **também aparece na TV** quando o
-navegador da TV avisa que dá para instalar (`beforeinstallprompt`) e
-some sozinho depois de instalar. Se o navegador da TV não souber
-instalar (é o caso do Downloader e da maioria deles), o app mostra
-sozinho, depois de 6 segundos, a dica: **abra pelo navegador da TV**
-(TV Bro, Puffin TV, Samsung Internet) — nunca pelo Downloader. Se abrir
-dentro de um app tipo Downloader, o app também mostra um aviso no topo
+**Botão INSTALAR na TV:** agora ele **aparece na TV desde o primeiro
+segundo** — não depende mais do evento `beforeinstallprompt`, que TVs
+não disparam (era exatamente por isso que o botão não aparecia no
+Downloader). O clique tem sempre uma resposta:
+
+- navegador da TV com instalação nativa → abre a janela de instalação;
+- navegador sem instalação nativa (Downloader, WebView, maioria das
+  TVs) → mostra o **passo a passo**: sair do Downloader e abrir pelo
+  **navegador da TV** (TV Bro, Puffin TV, Samsung Internet, Silk) e usar
+  o menu **“Instalar aplicativo” / “Adicionar atalho”**.
+
+O botão **some sozinho** quando o app instala de verdade. Se abrir
+ dentro de um app tipo Downloader, o app também mostra um aviso no topo
 dizendo para usar o navegador da TV.
 
 ---
@@ -147,8 +158,8 @@ quê e como resolver. Os casos mais comuns:
 | "Endereço não seguro (http://)" | O site não tem HTTPS | Use o GitHub Pages, que já vem com `https://` |
 | "Você está vendo isso dentro de outro app" | Link aberto no navegador embutido do WhatsApp/Instagram | Toque em ⋮ / 🔗 → **Abrir no Chrome** |
 | "manifest.json não encontrado (404)" | Você subiu só o `index.html` no repositório | Suba `index.html`, `manifest.json` e `service-worker.js` juntos na raiz |
-| "Pasta icons não encontrada" | A pasta `icons/` não foi enviada | **Não é mais problema** — os ícones agora estão embutidos no `manifest.json` e o app instala igual. Se quiser, envie a pasta depois (só melhora o favicon) |
-| Nenhum aviso, mas sem botão (Android) | Chrome às vezes não dispara o banner automático | Menu **⋮** do Chrome → **Instalar aplicativo** (o app também mostra essa dica sozinho) |
+| "Ícones não encontrados (pasta icons/)" | A pasta `icons/` não foi enviada | Suba a pasta `icons/` na raiz — com `icon-192.png`, `icon-512.png` e `icon-512-maskable.png`. Sem ela o Chrome **não** instala |
+| Nenhum aviso, mas sem botão (Android) | **Não existe mais**: o botão fica sempre visível | Se o Chrome não abrir a janela nativa, toque no **INSTALAR** mesmo assim — o app mostra o passo a passo (menu ⋮ → Instalar aplicativo) |
 | iPhone | O Safari **nunca** mostra botão de instalar | Botão **Compartilhar** (↑) → **Adicionar à Tela de Início** |
 
 > Dica: no Chrome do PC dá para conferir se o PWA está válido em
@@ -176,12 +187,15 @@ A cada **10 segundos** (só enquanto está tocando) o app lê a música atual:
   hora + o status (TOCANDO, buscando capa, ERRO…). Erros de `deezer` são
   normais em algumas redes (o app cai no iTunes automaticamente).
 - **Atualizei o index.html mas o celular mostra o app velho:** a `VERSION`
-  do `service-worker.js` já está em `v4`; se editar de novo, aumente
-  (`v4` → `v5`) e recarregue.
+  do `service-worker.js` já está em `v6`; se editar de novo, aumente
+  (`v6` → `v7`) e recarregue.
 - **Na TV ficou uma "tirinha fina" no meio da tela:** era o bug antigo —
   nesta versão o app detecta a TV pelo userAgent e força o layout de tela
-  cheia em qualquer viewport. Atualize o `service-worker.js` (v4) e feche
+  cheia em qualquer viewport. Atualize o `service-worker.js` (v6) e feche
   todas as abas para o Chrome pegar o index novo.
+- **PWABuilder acusava "imagens base64" no manifest:** corrigido — o
+  `manifest.json` agora usa só URLs externas (`icons/…`). Mantenha a
+  pasta `icons/` no repositório para a validação continuar passando.
 - **App travou no Downloader da TV:** o Downloader é um WebView limitado.
   Use o **TV Bro** (Android TV), **Silk** (Fire TV), **Samsung Internet**
   (Samsung) ou o navegador da LG — o próprio app mostra esse aviso quando
