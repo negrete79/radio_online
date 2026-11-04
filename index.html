@@ -273,6 +273,151 @@ section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,
   h1{font-size:30px}
   .eq{gap:2px}.eq i{width:5px}
 }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVO — smartphone, tablet, notebook, PC e TV Android
+   ────────────────────────────────────────────────────────────
+   No celular as colunas são "invisíveis" (display:contents) e
+   NADA muda. A partir de 960px vira 2 colunas (player à
+   esquerda, histórico/busca à direita). Na TV tudo cresce e
+   ganha margem de segurança para o overscan da tela.
+   ════════════════════════════════════════════════════════════ */
+.player-col,.side-col{display:contents}
+.side-col{min-width:0}
+
+/* Foco visível para navegar com o CONTROLE REMOTO da TV (D-pad) */
+button:focus-visible,input:focus-visible{
+  outline:3px solid var(--green);outline-offset:3px;border-radius:18px
+}
+
+/* ── Tablet (≥600px) ── */
+@media (min-width:600px){
+  .app{max-width:620px;padding:26px 22px 34px}
+  .card{padding:34px 30px 26px;border-radius:38px}
+  .top-badge{font-size:12px;letter-spacing:3px;padding:8px 18px}
+  h1{font-size:clamp(44px,7.5vw,60px);margin-top:16px}
+  .vinyl-zone{height:calc(min(400px,68vw) + 34px);margin:24px 0 4px}
+  .aura,.vinyl{width:min(400px,68vw);height:min(400px,68vw)}
+  .cover{width:min(288px,49vw);height:min(288px,49vw)}
+  .pop-btn{width:78px;height:78px;font-size:15px}
+  .song{margin-top:16px}
+  .song-title{font-size:30px}
+  .song-artist{font-size:18px}
+  .live-chip{font-size:12.5px}
+  .eq{height:56px;margin-top:18px}
+  .eq i{width:7px}
+  .play-btn{width:114px;height:114px}
+  .play-btn svg{width:47px;height:47px}
+  .vol{margin:16px 10px 0;max-width:470px}
+  .search-row input{padding:14px 16px;font-size:15px}
+  .search-row button{padding:14px 18px;font-size:14px}
+  .hist-item img{width:54px;height:54px}
+  .hist-txt .t{font-size:15px}
+  .hist-txt .a{font-size:13px}
+}
+
+/* ── Notebook / PC (≥960px) — e Android TV com 960px lógicos ── */
+@media (min-width:960px){
+  .app{max-width:1200px;padding:32px 34px 42px}
+  .card{
+    display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+    column-gap:64px;align-items:start;
+    padding:40px 48px 30px;border-radius:44px;
+  }
+  .top{grid-column:1/-1}
+  .player-col,.side-col{display:block}
+  h1{font-size:clamp(50px,4.8vw,72px)}
+  .vinyl-zone{height:calc(min(430px,40vw) + 36px);margin:28px 0 4px}
+  .aura,.vinyl{width:min(430px,40vw);height:min(430px,40vw)}
+  .cover{width:min(310px,29vw);height:min(310px,29vw)}
+  .pop-btn{width:88px;height:88px;font-size:17px}
+  .song-title{font-size:clamp(28px,2.9vw,42px);-webkit-line-clamp:3}
+  .song-artist{font-size:clamp(17px,1.6vw,23px)}
+  .live-chip{font-size:13px}
+  .eq{height:62px;gap:4px;margin-top:22px}
+  .eq i{width:8px}
+  .play-btn{width:126px;height:126px}
+  .play-btn svg{width:52px;height:52px}
+  .vol{margin:20px auto 0;max-width:430px}
+  section h2{font-size:13px;letter-spacing:3px}
+  .hist-item{padding:10px 12px}
+  .hist-item img{width:56px;height:56px}
+  .hist-txt .t{font-size:15px}
+  .search-row input{padding:14px 16px;font-size:15px}
+  .search-row button{padding:14px 18px;font-size:14px}
+  .q-results{grid-template-columns:1fr 1fr 1fr}
+  .debug{margin-top:22px}
+}
+
+/* TV de resolução lógica baixa (ex.: 960×540): compacta a altura
+   para o play ficar visível sem rolar com o controle remoto */
+@media (min-width:960px) and (max-height:760px){
+  .app{padding:12px 24px 18px}
+  .card{padding:20px 36px 16px;column-gap:44px}
+  .top-badge{font-size:11px;padding:6px 14px;letter-spacing:2.4px}
+  h1{font-size:clamp(30px,6.8vh,48px);margin:8px 0 2px}
+  .vinyl-zone{height:calc(min(250px,42vh) + 22px);margin:8px 0 2px}
+  .aura,.vinyl{width:min(250px,42vh);height:min(250px,42vh)}
+  .cover{width:min(180px,30vh);height:min(180px,30vh)}
+  .pop-btn{width:62px;height:62px;font-size:13px}
+  .song{margin-top:6px}
+  .song-title{font-size:clamp(22px,5vh,32px)}
+  .song-artist{font-size:clamp(13px,2.5vh,18px)}
+  .live-chip{font-size:11px;margin-top:6px}
+  .eq{height:40px;margin-top:8px;gap:3px}
+  .eq i{width:6px}
+  .play-row{margin:8px 0 0}
+  .play-btn{width:84px;height:84px}
+  .play-btn svg{width:36px;height:36px}
+  .vol{margin:10px auto 0;max-width:360px}
+  section{margin-top:12px}
+}
+
+/* ── TV grande / PC em tela cheia (1600px+) ──
+   Layout horizontal: vinil à esquerda, título/equalizador/play
+   à direita dele — TUDO cabe numa tela só, sem rolar. */
+@media (min-width:1600px), (min-width:1280px) and (min-height:960px){
+  .app{max-width:1560px;padding:4vmin} /* margem de segurança do overscan da TV */
+  .card{padding:44px 60px 36px;border-radius:52px;column-gap:80px;
+        grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr);align-items:center}
+  .player-col{
+    display:grid;
+    grid-template-columns:minmax(0,auto) minmax(0,1fr);
+    grid-template-areas:"vinyl song" "vinyl eq" "vinyl play" "vinyl vol";
+    column-gap:56px;row-gap:22px;align-content:center;
+  }
+  .vinyl-zone{grid-area:vinyl;height:calc(min(540px,44vmin) + 44px);margin:0}
+  .aura,.vinyl{width:min(540px,44vmin);height:min(540px,44vmin)}
+  .cover{width:min(390px,32vmin);height:min(390px,32vmin)}
+  .pop-btn{width:98px;height:98px;font-size:19px;letter-spacing:2px}
+  .song{grid-area:song;text-align:left;margin:0}
+  .song-title{text-align:left;font-size:clamp(36px,4.4vmin,62px)}
+  .song-artist{text-align:left;font-size:clamp(19px,2.3vmin,30px)}
+  .live-chip{margin-top:12px}
+  .eq{grid-area:eq;justify-content:flex-start;margin:0;height:74px}
+  .play-row{grid-area:play;justify-content:flex-start;margin:0}
+  .play-btn{width:clamp(112px,12.5vmin,152px);height:clamp(112px,12.5vmin,152px)}
+  .play-btn svg{width:clamp(46px,5.4vmin,64px);height:clamp(46px,5.4vmin,64px)}
+  .vol{grid-area:vol;margin:0;max-width:480px}
+  .top-badge{font-size:15px;letter-spacing:4px;padding:11px 24px}
+  h1{font-size:clamp(60px,6.4vmin,100px)}
+  .vol input{height:9px;border-radius:5px}
+  .vol input::-webkit-slider-thumb{width:30px;height:30px}
+  section h2{font-size:clamp(13px,1.6vmin,19px);letter-spacing:3.4px}
+  .hist-item{padding:14px 16px;border-radius:20px}
+  .hist-item img{width:74px;height:74px;border-radius:14px}
+  .hist-txt .t{font-size:clamp(15px,1.8vmin,22px)}
+  .hist-txt .a{font-size:clamp(13px,1.5vmin,18px)}
+  .search-row input{padding:18px 20px;font-size:clamp(15px,1.8vmin,20px);border-radius:20px}
+  .search-row button{padding:18px 24px;font-size:clamp(14px,1.7vmin,19px);border-radius:20px}
+  .q-results{grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .q-item{border-radius:22px}
+  .q-item .t{font-size:clamp(13px,1.6vmin,18px)}
+  .q-item .a{font-size:clamp(12px,1.4vmin,16px)}
+  #installBtn{font-size:clamp(15px,1.8vmin,20px);padding:18px}
+  .debug{font-size:clamp(11px,1.3vmin,15px)}
+  .footer{font-size:clamp(11px,1.3vmin,15px)}
+}
 </style>
 </head>
 <body>
@@ -285,66 +430,73 @@ section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,
       <h1>SERTANEJA POP</h1>
     </header>
 
-    <!-- ── Vinil + capa + botão POP ── -->
-    <div class="vinyl-zone">
-      <div class="aura"></div>
-      <div class="vinyl">
-        <img id="cover" class="cover" src="icons/icon-512.png" alt="Capa da música"/>
+    <!-- ── Vinil + capa + botão POP + player ──
+         No PC/TV este bloco vira a COLUNA ESQUERDA;
+         no celular ele é invisível (display:contents) e nada muda. -->
+    <div class="player-col">
+      <div class="vinyl-zone">
+        <div class="aura"></div>
+        <div class="vinyl">
+          <img id="cover" class="cover" src="icons/icon-512.png" alt="Capa da música"/>
+        </div>
+        <button class="pop-btn" id="popBtn" aria-label="Tocar ou pausar">POP</button>
       </div>
-      <button class="pop-btn" id="popBtn" aria-label="Tocar ou pausar">POP</button>
-    </div>
 
-    <!-- ── Música atual ── -->
-    <div class="song">
-      <div class="song-title" id="songTitle">Toque no PLAY para ouvir</div>
-      <div class="song-artist" id="songArtist">Rádio Sertaneja Pop • 24h ao vivo</div>
-      <div class="live-chip"><span class="dot"></span> AO VIVO</div>
-    </div>
-
-    <!-- ── Equalizador (20 barras geradas via JS) ── -->
-    <div class="eq" id="eq" aria-hidden="true"></div>
-
-    <!-- ── Play + Volume ── -->
-    <div class="play-row">
-      <button class="play-btn" id="playBtn" aria-label="Tocar">
-        <svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5.3v13.4L19 12z"/></svg>
-        <svg id="icPause" viewBox="0 0 24 24" style="display:none;margin-left:0"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>
-      </button>
-    </div>
-    <div class="vol">
-      <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/></svg>
-      <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume"/>
-      <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.6a5 5 0 010 6.8M18.8 6.2a8.2 8.2 0 010 11.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </div>
-
-    <!-- ── Histórico ── -->
-    <section>
-      <h2>TOCARAM AGORA POUCO</h2>
-      <div class="hist" id="histList"></div>
-    </section>
-
-    <!-- ── Busca manual de capa ── -->
-    <section>
-      <h2>BUSCAR CAPA</h2>
-      <div class="search-row">
-        <input id="q" type="search" placeholder="Ex: Gusttavo Lima Retrovisor" autocomplete="off"/>
-        <button id="qBtn">Buscar capa</button>
+      <!-- ── Música atual ── -->
+      <div class="song">
+        <div class="song-title" id="songTitle">Toque no PLAY para ouvir</div>
+        <div class="song-artist" id="songArtist">Rádio Sertaneja Pop • 24h ao vivo</div>
+        <div class="live-chip"><span class="dot"></span> AO VIVO</div>
       </div>
-      <div class="q-results" id="qResults"></div>
-    </section>
 
-    <!-- ── Instalação ── -->
-    <div class="install-row">
-      <button id="installBtn" hidden>INSTALAR APP</button>
-      <div class="ios-hint" id="iosHint">
-        <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
-        <b>“Adicionar à Tela de Início”</b> para instalar o app.
+      <!-- ── Equalizador (20 barras geradas via JS) ── -->
+      <div class="eq" id="eq" aria-hidden="true"></div>
+
+      <!-- ── Play + Volume ── -->
+      <div class="play-row">
+        <button class="play-btn" id="playBtn" aria-label="Tocar">
+          <svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5.3v13.4L19 12z"/></svg>
+          <svg id="icPause" viewBox="0 0 24 24" style="display:none;margin-left:0"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>
+        </button>
       </div>
-      <div class="diag-warn" id="diag"></div>
+      <div class="vol">
+        <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/></svg>
+        <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume"/>
+        <svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.6a5 5 0 010 6.8M18.8 6.2a8.2 8.2 0 010 11.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
     </div>
 
-    <!-- ── Debug ── -->
-    <div class="debug" id="debug">—</div>
+    <!-- ── Coluna lateral (histórico / busca / instalar) ── -->
+    <div class="side-col">
+      <!-- ── Histórico ── -->
+      <section>
+        <h2>TOCARAM AGORA POUCO</h2>
+        <div class="hist" id="histList"></div>
+      </section>
+
+      <!-- ── Busca manual de capa ── -->
+      <section>
+        <h2>BUSCAR CAPA</h2>
+        <div class="search-row">
+          <input id="q" type="search" placeholder="Ex: Gusttavo Lima Retrovisor" autocomplete="off"/>
+          <button id="qBtn">Buscar capa</button>
+        </div>
+        <div class="q-results" id="qResults"></div>
+      </section>
+
+      <!-- ── Instalação ── -->
+      <div class="install-row">
+        <button id="installBtn" hidden>INSTALAR APP</button>
+        <div class="ios-hint" id="iosHint">
+          <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
+          <b>“Adicionar à Tela de Início”</b> para instalar o app.
+        </div>
+        <div class="diag-warn" id="diag"></div>
+      </div>
+
+      <!-- ── Debug ── -->
+      <div class="debug" id="debug">—</div>
+    </div>
   </div>
   <div class="footer">SERTANEJA POP • 24H AO VIVO • FEITO PARA INSTALAR</div>
 </div>

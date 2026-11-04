@@ -5,6 +5,11 @@ App de rádio ao vivo 24h, instalável no celular (Android e iPhone), que
 **nome da música + a capa oficial do artista** (buscada no Deezer, com
 fallback para iTunes).
 
+**Responsivo de verdade:** celular, tablet, notebook, PC e **TV Android** —
+a partir de 960px vira 2 colunas e na TV o layout fica horizontal (vinil à
+esquerda, música e play à direita), com margem de segurança para o overscan
+e foco visível para navegar com o controle remoto.
+
 ## Arquivos
 
 | Arquivo | Para que serve |
