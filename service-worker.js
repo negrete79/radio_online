@@ -7,7 +7,7 @@
    • Para forçar atualização do app depois de editar o index.html,
      troque a versão abaixo (ex.: v2).
    ════════════════════════════════════════════════════════════ */
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = "sertanejapop-shell-" + VERSION;
 
 const SHELL = [
@@ -20,11 +20,15 @@ const SHELL = [
   "./icons/apple-touch-icon.png"
 ];
 
-/* Instalação: guarda o shell inteiro antes de ativar */
+/* Instalação: guarda o shell antes de ativar.
+   IMPORTANTE: cacheia arquivo por arquivo — se a pasta icons/ não foi
+   subida no servidor, o SW MESMO ASSIM instala (addAll falharia todo). */
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((c) => c.addAll(SHELL))
+      .then((c) => Promise.all(
+        SHELL.map((f) => c.add(f).catch(() => { /* arquivo faltando: segue */ }))
+      ))
       .then(() => self.skipWaiting())
   );
 });

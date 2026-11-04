@@ -983,14 +983,15 @@ window.addEventListener("appinstalled", function(){
   }).then(function(m){
     if (!m || !m.name || !m.icons || !m.icons.length)
       throw new Error("manifest incompleto");
-    /* o ícone principal existe de verdade no servidor? */
+    /* A pasta icons/ NÃO é mais obrigatória: os ícones vêm embutidos
+       dentro do manifest (base64), então o app instala mesmo sem ela.
+       Se faltar, avisamos de leve na linha de debug. */
     var ic = new Image();
+    ic.onload = function(){ dbg("Ícones do servidor OK"); };
     ic.onerror = function(){
-      showDiag("⚠️ <b>Pasta “icons” não encontrada no servidor.</b><br>" +
-        "Suba a pasta <b>icons/</b> completa na mesma raiz do index.html. " +
-        "Sem os ícones o app não instala.");
+      dbg("icons/ não subiu — usando ícone embutido (instala normal)");
     };
-    ic.src = m.icons[0].src;
+    ic.src = "icons/icon-192.png";
   }).catch(function(e){
     showDiag("⚠️ <b>manifest.json não encontrado (" +
       (e && e.message ? e.message : "erro") + ").</b><br>" +
