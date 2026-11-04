@@ -235,6 +235,15 @@ section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,
 
 /* Instalar */
 .install-row{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+
+/* Aviso de diagnóstico de instalação (por que o app não instala) */
+.diag-warn{
+  display:none;font-size:12.5px;line-height:1.6;color:#ffd3dc;
+  background:rgba(255,45,85,.10);border:1px solid rgba(255,45,85,.42);
+  border-radius:16px;padding:12px 14px;
+}
+.diag-warn.show{display:block}
+.diag-warn b{color:#fff}
 #installBtn{
   padding:15px;border-radius:18px;border:none;cursor:pointer;
   font-family:inherit;font-weight:900;font-size:14px;letter-spacing:1.4px;color:#fff;
@@ -331,6 +340,7 @@ section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,
         <b>iPhone:</b> toque no botão <b>Compartilhar</b> (caixinha com seta ↑) e depois em
         <b>“Adicionar à Tela de Início”</b> para instalar o app.
       </div>
+      <div class="diag-warn" id="diag"></div>
     </div>
 
     <!-- ── Debug ── -->
@@ -903,12 +913,24 @@ function renderResults(list){
 qBtn.addEventListener("click", runSearch);
 qInput.addEventListener("keydown", function(e){ if (e.key === "Enter") runSearch(); });
 
-/* ══════════════ INSTALAÇÃO PWA ══════════════ */
+/* ══════════════ INSTALAÇÃO PWA + DIAGNÓSTICO ══════════════
+   Se o app não instala, o aviso vermelho abaixo do botão diz
+   EXATAMENTE o motivo (arquivo local, sem https, dentro de outro
+   app, manifest faltando no servidor…) e como resolver. */
+var diagEl = $("diag");
+function showDiag(html){
+  if (!diagEl) return;
+  diagEl.innerHTML = html;
+  diagEl.classList.add("show");
+}
+function hideDiag(){ if (diagEl) diagEl.classList.remove("show"); }
+
 window.addEventListener("beforeinstallprompt", function(e){
   e.preventDefault();
   deferredPrompt = e;
   installBtn.hidden = false;
-  dbg("App pronto para instalar");
+  hideDiag(); /* instalável de verdade — some com avisos */
+  dbg("App pronto para instalar ✓");
 });
 installBtn.addEventListener("click", function(){
   if (!deferredPrompt) return;
@@ -921,22 +943,82 @@ installBtn.addEventListener("click", function(){
 });
 window.addEventListener("appinstalled", function(){
   installBtn.hidden = true;
-  dbg("App instalado com sucesso!");
+  dbg("App instalado com sucesso! ✓");
 });
+
+/* Médico de instalação — roda 1x ao abrir o app */
 (function(){
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   var standalone = window.matchMedia("(display-mode: standalone)").matches ||
                    window.navigator.standalone === true;
   if (isIOS && !standalone) iosHint.classList.add("show");
-  if (standalone) dbg("Rodando como app instalado");
+  if (standalone){ dbg("Rodando como app instalado ✓"); return; }
+
+  /* 1) Abriu o arquivo direto do aparelho/PC (sem servidor) */
+  if (location.protocol === "file:"){
+    showDiag("⚠️ <b>Você abriu o arquivo direto do aparelho.</b><br>" +
+      "Assim não dá para instalar. Suba os arquivos no <b>GitHub Pages</b> " +
+      "(veja o README) e abra o link no Chrome/Safari — aí o botão INSTALAR aparece.");
+    return;
+  }
+  /* 2) Endereço sem HTTPS */
+  if (!window.isSecureContext){
+    showDiag("⚠️ <b>Endereço não seguro (http://).</b><br>" +
+      "O navegador só instala apps em sites <b>https://</b>. " +
+      "Use o GitHub Pages, que já vem com https.");
+    return;
+  }
+  /* 3) Página aberta DENTRO de outro app (WhatsApp, Instagram…) */
+  if (/fbav|fban|instagram|linkedinapp|whatsapp|snapchat|tiktok|musically/i.test(navigator.userAgent)){
+    showDiag("⚠️ <b>Você está vendo isso dentro de outro app.</b><br>" +
+      "Toque no menu ⋮ ou no link 🔗 e escolha <b>“Abrir no Chrome”</b> — " +
+      "só lá o app pode ser instalado.");
+    return;
+  }
+
+  /* 4) Confere se o manifest.json subiu junto no servidor */
+  fetch("manifest.json", { cache: "no-store" }).then(function(r){
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(function(m){
+    if (!m || !m.name || !m.icons || !m.icons.length)
+      throw new Error("manifest incompleto");
+    /* o ícone principal existe de verdade no servidor? */
+    var ic = new Image();
+    ic.onerror = function(){
+      showDiag("⚠️ <b>Pasta “icons” não encontrada no servidor.</b><br>" +
+        "Suba a pasta <b>icons/</b> completa na mesma raiz do index.html. " +
+        "Sem os ícones o app não instala.");
+    };
+    ic.src = m.icons[0].src;
+  }).catch(function(e){
+    showDiag("⚠️ <b>manifest.json não encontrado (" +
+      (e && e.message ? e.message : "erro") + ").</b><br>" +
+      "Suba o <b>manifest.json</b> na MESMA pasta do index.html. " +
+      "Sem ele o app não instala.");
+  });
+
+  /* 5) Chrome: se em 6s o botão não apareceu e não há aviso grave,
+     ensina o caminho manual do menu (sempre funciona) */
+  if (!isIOS){
+    setTimeout(function(){
+      if (deferredPrompt || !installBtn.hidden) return;
+      if (diagEl && diagEl.classList.contains("show")) return;
+      showDiag("💡 <b>Para instalar:</b> menu <b>⋮</b> do navegador → " +
+        "<b>“Instalar aplicativo”</b> (ou <b>“Adicionar à tela inicial”</b>).");
+    }, 6000);
+  }
 })();
 
 /* ══════════════ SERVICE WORKER ══════════════ */
 if ("serviceWorker" in navigator){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("service-worker.js")
+      .then(function(){ dbg("Service worker ativo ✓ (app instalável)"); })
       .catch(function(e){ dbg("Service worker: " + e.message); });
   });
+} else {
+  dbg("Este navegador não suporta service worker");
 }
 
 /* ══════════════ EQUALIZADOR (20 barras, só CSS anima) ══════════════ */

@@ -74,6 +74,28 @@ play/pause funcionando.
 
 ---
 
+## App não instala? O app agora te diz o motivo
+
+Abra o app e olhe abaixo do lugar do botão **INSTALAR APP**: se algo estiver
+impedindo a instalação, aparece um **aviso vermelho** dizendo exatamente o
+quê e como resolver. Os casos mais comuns:
+
+| Aviso | Motivo | Solução |
+|---|---|---|
+| "Você abriu o arquivo direto do aparelho" | Você abriu o `index.html` salvo no celular/PC (`file://…`) | Instalar só funciona **num link hospedado**. Suba no GitHub Pages (Passo 2) e abra o link |
+| "Endereço não seguro (http://)" | O site não tem HTTPS | Use o GitHub Pages, que já vem com `https://` |
+| "Você está vendo isso dentro de outro app" | Link aberto no navegador embutido do WhatsApp/Instagram | Toque em ⋮ / 🔗 → **Abrir no Chrome** |
+| "manifest.json não encontrado (404)" | Você subiu só o `index.html` no repositório | Suba **todos** os arquivos: `index.html`, `manifest.json`, `service-worker.js` e a pasta `icons/` |
+| "Pasta icons não encontrada" | A pasta `icons/` não foi enviada | Envie a pasta `icons/` completa na raiz do repo |
+| Nenhum aviso, mas sem botão (Android) | Chrome às vezes não dispara o banner automático | Menu **⋮** do Chrome → **Instalar aplicativo** (o app também mostra essa dica sozinho) |
+| iPhone | O Safari **nunca** mostra botão de instalar | Botão **Compartilhar** (↑) → **Adicionar à Tela de Início** |
+
+> Dica: no Chrome do PC dá para conferir se o PWA está válido em
+> **F12 → Application → Manifest**. Lá aparece qualquer erro de manifest,
+> ícone ou service worker.
+
+---
+
 ## Como funciona a metadata (por dentro)
 
 A cada **10 segundos** (só enquanto está tocando) o app lê a música atual:
